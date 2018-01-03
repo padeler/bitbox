@@ -1,4 +1,6 @@
+#pragma once 
 
+#include "config.h"
 #include "FastLED.h"
 
 #define NUM_LEDS 256
@@ -7,28 +9,55 @@
 #define MATRIX_WIDTH 16
 #define MATRIX_HEIGHT 16
 
-void init_display();
+class Display{
+public:
+  Display(Config *cfg);
 
-void update_led(int pos, char val);
+  void update_led(int pos, char val);
+  
+  void update_leds(byte *buf, int offset, int buf_size);
+  
+  inline int find_led_index(uint8_t row, uint8_t col);
+  
+  void draw_char(char c, int x, int y, CRGB color, bool compact, bool overlay);
+  void draw_string(String str, int x, int y, CRGB color, bool compact, bool overlay);
+  
+  void set_led(int x, int y,  CRGB color);
+  void overlay_led(int x, int y, CRGB color);
 
-void update_leds(byte *buf, int offset, int buf_size);
+  void fillrect(int x, int y, int width, int height, CRGB color);
 
-inline int find_led_index(uint8_t row, uint8_t col);
+  void fadetoblack(int x, int y, int width, int height, uint8_t amount);
+  
+  inline void clear_display(){
+    fillrect(0, 0, MATRIX_WIDTH, MATRIX_HEIGHT, CRGB(0,0,0));
+  }
 
-void draw_chr(int x, int y, CRGB color, bool compact, char c);
-void draw_string(int x, int y, CRGB color, bool compact, String str);
+  inline void reconfigure()
+  {
+    FastLED.setBrightness(cfg->brightness);
+  }
 
-void set_led(int x, int y,  CRGB color);
+  inline void flush_buffer()
+  {
+    if(repaint_needed){
+      FastLED.show();
+      repaint_needed = false;    
+    }
+  }
+  
+  inline void repaint(){
+    repaint_needed = true;
+  }
+  
+private:
+  Config *cfg;
+  
+  bool repaint_needed;
+  
+  // Define the array of leds
+  CRGB leds[NUM_LEDS];
 
-void fillrect(int x, int y, int width, int height, CRGB color);
 
-
-inline void clear_display(){
-  fillrect(0, 0, MATRIX_WIDTH, MATRIX_HEIGHT, CRGB(0,0,0));
-}
-
-inline void repaint(){
-  FastLED.show();
-}
-
+};
 
