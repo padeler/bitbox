@@ -58,23 +58,34 @@ public:
       MM_X = 5;
       MM_Y = 8;
       
-
+      snake_head = 0;
       for(int i=0;i<CLOCK_NUM_POINTS;++i)
       {       
         h_points[i].x = 0;
         h_points[i].y = i % MATRIX_HEIGHT;
       }
-      heatIndex = 0;
-      delta_heat = 1;
+      colorIndex = 0;
+      delta_color = 1;
+      motion = 1;
+      dx = 1;
+      dy = 1;
 
       this->cfg = cfg;
       this->dsp = dsp;
+  }
+  void draw_bg(){
+    if(cfg->clock_mode & CLOCK_MODE_POINTS){
+      draw_points();
+    }
+    if(cfg->clock_mode & CLOCK_MODE_SNAKE){
+      draw_snake();
+    }
   }
 
   void draw(){
   
     dsp->fadetoblack(0,0,16,16, 128);
-    draw_points();
+    draw_bg();
     
     String hour_str = format_digit(hour());
     String min_str = format_digit(minute());
@@ -86,25 +97,80 @@ public:
   void draw_points(){
     for(int i=0;i<CLOCK_NUM_POINTS;++i){
         h_points[i].x = (h_points[i].x+1);
-        dsp->set_led(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, heatIndex));
+        dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
         
         if(h_points[i].x>MATRIX_WIDTH){
           h_points[i].x = -random(CLOCK_NUM_POINTS*10);
           h_points[i].y = random(CLOCK_NUM_POINTS*10) % MATRIX_HEIGHT;
         }
     }
-    heatIndex += delta_heat;
-    if(heatIndex==0) delta_heat = -delta_heat;
+    colorIndex += delta_color;
+    if(colorIndex==0) delta_color = -delta_color;
     
   }
-  int8_t delta_heat;
-  uint8_t heatIndex;
+
+  void draw_snake(){
+    Point *p = &h_points[snake_head];
+    snake_head = (snake_head+1)%CLOCK_NUM_POINTS;
+    Point *c = &h_points[snake_head];
+
+    if(random(20)==1) motion = -motion;
+    if(random(10)==1) dx = -dx;
+    if(random(10)==1) dy = -dy;
+    bool route_found=false;
+    for(int i=0;i<3;++i)
+    {
+      c->x = p->x;
+      c->y = p->y;
+    
+      if(motion>0){
+        c->x = (c->x + dx);
+        if(c->x<0) c->x = p->x;
+        else if(c->x>=MATRIX_WIDTH) c->x = p->x;     
+      }
+      else{
+        c->y = (c->y + dy);
+        if(c->y<0) c->y = p->y;
+        else if(c->y>=MATRIX_HEIGHT) c->y = p->y;     
+      }
+
+      CRGB t = dsp->get(c->x, c->y);
+      
+      if(t[0]==0 && t[1]==0 && t[2]==0){
+        route_found=true;
+        break;
+      }
+      // change direction of motion and try again
+      if(i==0) motion = -motion;
+      dx = -dx;
+      dy = -dy;    
+    }
+
+    if(!route_found){
+      c->x = p->x;
+      c->y = p->y;
+    }
+    
+    for(int i=0;i<CLOCK_NUM_POINTS;++i){
+      dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(ForestColors_p, colorIndex));
+    }
+    
+    colorIndex += delta_color;
+    if(delta_color==0) delta_color = -delta_color;      
+
+  }
+  
+  int8_t delta_color;
+  int8_t dx,dy, motion;
+  uint8_t colorIndex;
   Config *cfg;
   Display *dsp;
   
   uint8_t HH_X, HH_Y;
   uint8_t MM_X, MM_Y;
- 
+
+  uint8_t snake_head;
+  
   Point h_points[CLOCK_NUM_POINTS];
   
 };

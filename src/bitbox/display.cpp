@@ -18,7 +18,7 @@ Display::Display(Config *cfg){
   repaint();
 }
 
-void Display::draw_string(String str, int x, int y,  CRGB color, bool compact, bool overlay)
+void Display::draw_string(String str, int x, int y,  CRGB color, bool compact, bool overlay_color)
 {
   int char_step = char_width;
   if(compact)
@@ -30,7 +30,7 @@ void Display::draw_string(String str, int x, int y,  CRGB color, bool compact, b
   {
     char c = str.charAt(p);
     int cx = x+p*char_step;
-    draw_char(c, cx, y, color, compact, overlay);
+    draw_char(c, cx, y, color, compact, overlay_color);
 
     if(cx>=MATRIX_WIDTH) break;
   }
@@ -40,7 +40,7 @@ void Display::draw_string(String str, int x, int y,  CRGB color, bool compact, b
  * Using the font.h character set 
  * Draw the character c. Top left corner of the character is x,y.
  */
-void Display::draw_char(char c, int top_left_x, int top_left_y, CRGB color, bool compact, bool overlay){
+void Display::draw_char(char c, int top_left_x, int top_left_y, CRGB color, bool compact, bool overlay_color){
   int idx = ((int)c - ascii_first);
 
   uint8_t maxW = char_width;
@@ -61,8 +61,8 @@ void Display::draw_char(char c, int top_left_x, int top_left_y, CRGB color, bool
     {
       if((mask & chr_row)>0) // light led
       {
-        if(overlay) overlay_led(top_left_x+cx, top_left_y+cy, color);
-        else set_led(top_left_x+cx, top_left_y+cy, color);
+        if(overlay_color) overlay(top_left_x+cx, top_left_y+cy, color);
+        else set(top_left_x+cx, top_left_y+cy, color);
       }
       mask >>= 1;
     }
@@ -75,7 +75,7 @@ void Display::fillrect(int x, int y, int width, int height, CRGB color)
   {
     for(int row=y;row<height;++row)
     {
-      set_led(col,row,color);
+      set(col,row,color);
     }
   }
 }
@@ -89,27 +89,37 @@ void Display::fadetoblack(int x, int y, int width, int height, uint8_t amount)
     {
       if(x>=0 && x<MATRIX_WIDTH && y>=0 && y<MATRIX_HEIGHT)
       {
-        int frm_idx = find_led_index(row, col);
+        int frm_idx = find_index(row, col);
         leds[frm_idx].nscale8(amount);
       }
     }
   }  
 }
 
-void Display::overlay_led(int x, int y, CRGB color){
+void Display::overlay(int x, int y, CRGB color){
   if(x>=0 && x<MATRIX_WIDTH && y>=0 && y<MATRIX_HEIGHT)
   {
-    int frm_idx = find_led_index(y, x);
+    int frm_idx = find_index(y, x);
     leds[frm_idx] += color;
   }
 }
-void Display::set_led(int x, int y, CRGB color){
+void Display::set(int x, int y, CRGB color){
   if(x>=0 && x<MATRIX_WIDTH && y>=0 && y<MATRIX_HEIGHT)
   {
-    int frm_idx = find_led_index(y, x);
+    int frm_idx = find_index(y, x);
     leds[frm_idx] = color;
   }
 }
+
+CRGB Display::get(int x, int y){
+  if(x>=0 && x<MATRIX_WIDTH && y>=0 && y<MATRIX_HEIGHT)
+  {
+    int frm_idx = find_index(y, x);
+    return leds[frm_idx];
+  }
+  return CRGB::Black;
+}
+
 
 void Display::update_led(int pos, char val){
   
@@ -118,7 +128,7 @@ void Display::update_led(int pos, char val){
   
   int row = img_idx/MATRIX_WIDTH;
   int col = img_idx%MATRIX_WIDTH;
-  int frm_idx = find_led_index(row, col);
+  int frm_idx = find_index(row, col);
   leds[frm_idx][color] = val;
 }
 
@@ -130,7 +140,7 @@ void Display::update_leds(byte *buf, int offset, int buf_size)
 
     int row = img_idx/MATRIX_WIDTH;
     int col = img_idx%MATRIX_WIDTH;
-    int frm_idx = find_led_index(row, col);
+    int frm_idx = find_index(row, col);
 
     leds[frm_idx][0] = buf[buf_idx];
     leds[frm_idx][1] = buf[buf_idx+1];
@@ -138,7 +148,7 @@ void Display::update_leds(byte *buf, int offset, int buf_size)
   }
 }
 
-inline int Display::find_led_index(uint8_t row, uint8_t col){
+inline int Display::find_index(uint8_t row, uint8_t col){
   int frm_idx;
   if(col<8){ // FIXME convention specific to the wiring of my led matrix: Two parts of 16 rows by 8 columns connected in series
      frm_idx = row*8+col; 

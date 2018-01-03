@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <WString.h>
 
-#define CLOCK_MODE_NORMAL 0
-#define CLOCK_MODE_OVERLAY 2
+#define CLOCK_MODE_PLAIN 0
+#define CLOCK_MODE_POINTS 2
+#define CLOCK_MODE_SNAKE 4
+#define CLOCK_MODE_PONG 6
 
 
 #define PACKET_TYPE_NOTSET 0
@@ -17,8 +19,8 @@
 #define BUF_SIZE 16*3
 
 #define MIN_REPAINT 30
-#define CLOCK_SLEEP 1000 // wait this amount of millis from last image received from serial.
-#define CLOCK_UPDATE 100 // redraw clock  at most this often
+#define CLOCK_SLEEP 2000 // wait this amount of millis from last image received from serial.
+#define CLOCK_UPDATE 125 // redraw clock  at most this often
 
 #define DEFAULT_TIME  1514589221 
 
@@ -32,7 +34,7 @@ public:
  
   Config(){
     sync_time = DEFAULT_TIME;
-    clock_mode = CLOCK_MODE_NORMAL;
+    clock_mode = CLOCK_MODE_SNAKE;
     brightness = 20;
     last_image_received = 0;
   }

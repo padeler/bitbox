@@ -14,16 +14,16 @@ public:
   Display(Config *cfg);
 
   void update_led(int pos, char val);
-  
   void update_leds(byte *buf, int offset, int buf_size);
   
-  inline int find_led_index(uint8_t row, uint8_t col);
+  inline int find_index(uint8_t row, uint8_t col);
   
   void draw_char(char c, int x, int y, CRGB color, bool compact, bool overlay);
   void draw_string(String str, int x, int y, CRGB color, bool compact, bool overlay);
-  
-  void set_led(int x, int y,  CRGB color);
-  void overlay_led(int x, int y, CRGB color);
+
+  CRGB get(int x, int y);
+  void set(int x, int y,  CRGB color);
+  void overlay(int x, int y, CRGB color);
 
   void fillrect(int x, int y, int width, int height, CRGB color);
 
