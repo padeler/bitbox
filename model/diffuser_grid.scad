@@ -11,10 +11,10 @@ height = 6; // can range from 5-10mm
 side = length/rows;
 lip = 1.2; // min lip is 1mm
 
-frame = 4; // width of frame
+frame = 9; // width of frame
 frame_thickness = 3;
 
-// Total size is 140 = frame*2 + total_length
+// Total size is 150 = frame*2 + total_length
 
 module lines(trx, try) {
     translate([0,try,lip]) cube([length,thickness,height-lip]);
