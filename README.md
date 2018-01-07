@@ -13,5 +13,15 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 ## 3rd party arduino libraries 
 
 - WS2812 control: [FastLED](https://github.com/FastLED/FastLED)
-- [Time, TimeAlarms](https://www.pjrc.com/teensy/td_libs_Time.html)
--
+- [Time](https://www.pjrc.com/teensy/td_libs_Time.html)
+
+## Usefull links
+
+- [Power Topology](https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/power-topology)
+
+
+## TODOs
+
+- Fusebox
+- Separate power supply for arduino and LED panel
+- Diodes
