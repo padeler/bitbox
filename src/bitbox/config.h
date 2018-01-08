@@ -4,10 +4,16 @@
 #include <WString.h>
 
 #define CLOCK_MODE_PLAIN 0
-#define CLOCK_MODE_POINTS 2
-#define CLOCK_MODE_SNAKE 4
-#define CLOCK_MODE_PONG 6
+#define CLOCK_MODE_STARFIELD 1
+#define CLOCK_MODE_SNAKE 2
+#define CLOCK_MODE_PONG 3
+#define CLOCK_MODE_MAX 4
+#define CLOCK_MODE_RANDOM 128
 
+
+#define CLOCK_CHANGE_BG 6000 
+
+#define MAX_BRIGHTNESS 40 
 
 #define PACKET_TYPE_NOTSET 0
 #define PACKET_TYPE_SETTINGS 1
@@ -28,13 +34,15 @@ class Config
 {
 public:
   unsigned long default_time, sync_time;
+  unsigned long clock_change_bg;// if clock_mode&CLOCK_MODE_RANDOM then change bg every this amount of millis
   uint8_t clock_mode;
   uint8_t brightness;
   unsigned int last_image_received;
  
   Config(){
     sync_time = DEFAULT_TIME;
-    clock_mode = CLOCK_MODE_SNAKE;
+    clock_mode = CLOCK_MODE_RANDOM;
+    clock_change_bg = CLOCK_CHANGE_BG; 
     brightness = 20;
     last_image_received = 0;
   }

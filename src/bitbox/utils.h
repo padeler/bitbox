@@ -3,6 +3,10 @@
 #include "config.h"
 #include "display.h"
 
+// Pong defines
+#define PL 1 
+#define PR 4
+#define PB 6
 
 
 void flash(int times){
@@ -53,37 +57,54 @@ class Clock{
 
 public:
   Clock(Config *cfg, Display *dsp){
-      HH_X = 1;
+      HH_X = 2;
       HH_Y = 0;
-      MM_X = 5;
-      MM_Y = 8;
-      
+      MM_X = 4;
+      MM_Y = 7;
+
+      reset_points();
       snake_head = 0;
-      for(int i=0;i<CLOCK_NUM_POINTS;++i)
-      {       
-        h_points[i].x = 0;
-        h_points[i].y = i % MATRIX_HEIGHT;
-      }
       colorIndex = 0;
       delta_color = 1;
       motion = 1;
       dx = 1;
       dy = 1;
+      last_bg_change = millis();
 
       this->cfg = cfg;
       this->dsp = dsp;
   }
   void draw_bg(){
-    if(cfg->clock_mode & CLOCK_MODE_POINTS){
-      draw_points();
-    }
-    if(cfg->clock_mode & CLOCK_MODE_SNAKE){
-      draw_snake();
+    switch(cfg->clock_mode & 0x0F)
+    {
+      case CLOCK_MODE_STARFIELD:
+        draw_starfield();
+        break;
+      case CLOCK_MODE_SNAKE:
+        draw_snake();
+        break;
+      case CLOCK_MODE_PONG:
+        draw_pong();
+        break;
+      default: 
+        break; // CLOCK_MODE_PLAIN      
     }
   }
 
   void draw(){
   
+    if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
+    {
+      reset_points();
+      last_bg_change = millis();
+      uint8_t new_mode;
+      do{
+         new_mode = random(CLOCK_MODE_MAX);
+      }while(new_mode==cfg->clock_mode&0x0F);
+
+      cfg->clock_mode = new_mode | CLOCK_MODE_RANDOM;
+    }
+    
     dsp->fadetoblack(0,0,16,16, 128);
     draw_bg();
     
@@ -94,19 +115,18 @@ public:
     dsp->repaint();    
   }
 
-  void draw_points(){
+  void draw_starfield(){
     for(int i=0;i<CLOCK_NUM_POINTS;++i){
-        h_points[i].x = (h_points[i].x+1);
+        h_points[i].x = (h_points[i].x-1);
         dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
         
-        if(h_points[i].x>MATRIX_WIDTH){
-          h_points[i].x = -random(CLOCK_NUM_POINTS*10);
+        if(h_points[i].x<0){
+          h_points[i].x = random(CLOCK_NUM_POINTS*10);
           h_points[i].y = random(CLOCK_NUM_POINTS*10) % MATRIX_HEIGHT;
         }
     }
     colorIndex += delta_color;
     if(colorIndex==0) delta_color = -delta_color;
-    
   }
 
   void draw_snake(){
@@ -159,6 +179,68 @@ public:
     if(delta_color==0) delta_color = -delta_color;      
 
   }
+
+  void draw_pong(){
+    // left pad indices 0,1,2
+    // right pad indices 3,4,5
+    // ball pad 6 
+//    if(h_points[PL].x!=0 || h_points[PR].x!=MATRIX_WIDTH-1) reset_points();
+
+    // check ball
+    if(h_points[PB].x==1 || h_points[PB].x==MATRIX_WIDTH-2)
+    {
+      dx = -dx;
+      if(random(3)==1) dy = -dy;
+    }
+    if(h_points[PB].y+dy==-1 || h_points[PB].y+dy==MATRIX_HEIGHT){
+      dy = -dy;
+    }
+
+    h_points[PB].x += dx;
+    h_points[PB].y += dy;
+
+    // check pads
+    update_pong_pad(PL,0);
+    update_pong_pad(PR,MATRIX_WIDTH-1);
+
+    // draw everything
+    dsp->fillrect(0,0,1,MATRIX_HEIGHT, CRGB::Black);
+    dsp->fillrect(MATRIX_WIDTH-1,0,1,MATRIX_HEIGHT, CRGB::Black);
+    for(int8_t i=-1; i<2; i++){
+       dsp->set(h_points[PL+i].x, h_points[PL+i].y, CRGB::Green);
+       dsp->set(h_points[PR+i].x, h_points[PR+i].y, CRGB::Blue);
+    }
+    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
+  }
+
+  void reset_points(){
+    // draw everything
+    for(int8_t i=0; i<CLOCK_NUM_POINTS; i++){
+       h_points[i].x = MATRIX_WIDTH/2;
+       h_points[i].y = MATRIX_HEIGHT/2;
+    }
+  }
+
+  void update_pong_pad(int8_t idx, int8_t xpos){
+    int8_t goal = MATRIX_HEIGHT/2; // move towards the mid of the screen
+    if(abs(h_points[PB].x-h_points[idx].x)<MATRIX_WIDTH/2){ // move towards the ball
+      goal = h_points[PB].y;
+    }
+            
+    if(h_points[idx].y<goal){
+      h_points[idx].y = min(h_points[idx].y+1,MATRIX_HEIGHT-2);
+    }
+    else if(h_points[idx].y>goal){
+      h_points[idx].y = max(h_points[idx].y-1,1);
+    }
+    h_points[idx-1].y = h_points[idx].y-1;
+    h_points[idx+1].y = h_points[idx].y+1;
+
+    h_points[idx-1].x = xpos;
+    h_points[idx].x = xpos;
+    h_points[idx+1].x = xpos;
+    
+  }
   
   int8_t delta_color;
   int8_t dx,dy, motion;
@@ -170,6 +252,7 @@ public:
   uint8_t MM_X, MM_Y;
 
   uint8_t snake_head;
+  unsigned long last_bg_change;
   
   Point h_points[CLOCK_NUM_POINTS];
   

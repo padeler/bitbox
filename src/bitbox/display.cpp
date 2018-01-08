@@ -71,9 +71,9 @@ void Display::draw_char(char c, int top_left_x, int top_left_y, CRGB color, bool
 
 void Display::fillrect(int x, int y, int width, int height, CRGB color)
 {
-  for(int col=x;col<width;++col)
+  for(int col=x;col<x+width;++col)
   {
-    for(int row=y;row<height;++row)
+    for(int row=y;row<y+height;++row)
     {
       set(col,row,color);
     }
@@ -83,9 +83,9 @@ void Display::fillrect(int x, int y, int width, int height, CRGB color)
 
 void Display::fadetoblack(int x, int y, int width, int height, uint8_t amount)
 {
-  for(int col=x;col<width;++col)
+  for(int col=x;col<x+width;++col)
   {
-    for(int row=y;row<height;++row)
+    for(int row=y;row<y+height;++row)
     {
       if(x>=0 && x<MATRIX_WIDTH && y>=0 && y<MATRIX_HEIGHT)
       {
