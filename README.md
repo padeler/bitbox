@@ -14,6 +14,7 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 
 - WS2812 control: [FastLED](https://github.com/FastLED/FastLED)
 - [Time](https://www.pjrc.com/teensy/td_libs_Time.html)
+- [DS1307RTC](https://github.com/PaulStoffregen/DS1307RTC) 
 
 ## Usefull links
 
