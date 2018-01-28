@@ -70,7 +70,7 @@ public:
       motion = 1;
       dx = 1;
       dy = 1;
-      last_bg_change = millis();
+      last_bg_change = millis() - cfg->clock_change_bg;
 
       this->cfg = cfg;
       this->dsp = dsp;
@@ -100,7 +100,7 @@ public:
       last_bg_change = millis();
       uint8_t new_mode;
       do{
-         new_mode = random(CLOCK_MODE_MAX);
+         new_mode = random(CLOCK_MODE_PLAIN);
       }while(new_mode==cfg->clock_mode&0x0F);
 
       cfg->clock_mode = new_mode | CLOCK_MODE_RANDOM;
@@ -111,7 +111,7 @@ public:
     
     String hour_str = format_digit(hour());
     String min_str = format_digit(minute());
-    dsp->draw_string(hour_str, HH_X,HH_Y,CRGB::SlateGray, false, true);
+    dsp->draw_string(hour_str, HH_X,HH_Y,CRGB::Yellow, false, true);
     dsp->draw_string(min_str, MM_X,MM_Y,CRGB::SteelBlue, false, true);
     dsp->repaint();    
   }

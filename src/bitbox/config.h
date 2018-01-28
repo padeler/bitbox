@@ -3,15 +3,11 @@
 #include <stdint.h>
 #include <WString.h>
 
-#define CLOCK_MODE_PLAIN 0
-#define CLOCK_MODE_STARFIELD 1
-#define CLOCK_MODE_SNAKE 2
-#define CLOCK_MODE_PONG 3
-#define CLOCK_MODE_MAX 4
+#define CLOCK_MODE_STARFIELD 0
+#define CLOCK_MODE_SNAKE 1
+#define CLOCK_MODE_PONG 2
+#define CLOCK_MODE_PLAIN 3 // also max
 #define CLOCK_MODE_RANDOM 128
-
-
-#define CLOCK_CHANGE_BG 6000 
 
 #define MAX_BRIGHTNESS 40 
 
@@ -42,8 +38,8 @@ public:
   Config(){
     sync_time = DEFAULT_TIME;
     clock_mode = CLOCK_MODE_RANDOM;
-    clock_change_bg = CLOCK_CHANGE_BG; 
-    brightness = 20;
+    clock_change_bg = 300000; 
+    brightness = 10;
     last_image_received = 0;
   }
 
