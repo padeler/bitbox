@@ -1,4 +1,6 @@
 #include <TimeLib.h>
+#include <Wire.h>
+#include <DS1307RTC.h>
 
 #include "config.h"
 #include "display.h"
@@ -39,8 +41,17 @@ void setup() {
 
   // init communication handler
   handler = new CommHandler(&cfg, dsp);
-  
-  setTime(cfg.sync_time);
+
+  setSyncProvider(RTC.get);
+  if(timeStatus() != timeSet)
+  {
+    setTime(cfg.sync_time);
+    Serial.println("Unable to sync with the RTC");
+  }
+  else
+  {
+    Serial.println("RTC has set the system time");
+  }
 }
 
 void serialEvent()

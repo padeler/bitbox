@@ -40,6 +40,7 @@ String format_time(){
 void update_time(byte *buf, int buf_len){
   // read pc time 
   unsigned long t = atol((char*)buf);
+  RTC.set(t);   // set the RTC and the system time to the received value
   setTime(t);
 }
 
