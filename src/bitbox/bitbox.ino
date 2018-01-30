@@ -5,6 +5,7 @@
 #include "config.h"
 #include "display.h"
 #include "utils.h"
+#include "clock.h"
 
 
 

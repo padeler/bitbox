@@ -6,7 +6,8 @@
 #define CLOCK_MODE_STARFIELD 0
 #define CLOCK_MODE_SNAKE 1
 #define CLOCK_MODE_PONG 2
-#define CLOCK_MODE_PLAIN 3 // also max
+#define CLOCK_MODE_BREAKOUT 3
+#define CLOCK_MODE_PLAIN 4 // also max
 #define CLOCK_MODE_RANDOM 128
 
 #define MAX_BRIGHTNESS 40 
