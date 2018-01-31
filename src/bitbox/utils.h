@@ -3,17 +3,6 @@
 #include "config.h"
 #include "display.h"
 
-inline String format_digit(int d){
-  String s(d);
-  if(d < 10)
-    return String("0"+s);
-  return s;
-}
-
-
-String format_time(){
-  return format_digit(hour()) + format_digit(minute());
-}
 
 
 void update_time(byte *buf, int buf_len){

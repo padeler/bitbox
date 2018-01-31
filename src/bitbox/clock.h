@@ -3,6 +3,9 @@
 #include "config.h"
 #include "display.h"
 
+#include "mario.h"
+#include "ben.h"
+
 // Pong defines
 #define PL 1 
 #define PR 4
@@ -41,11 +44,11 @@ public:
       dx = 1;
       dy = 1;
       last_bg_change = millis() - cfg->clock_change_bg;
-
+      last_update = 0;
       this->cfg = cfg;
       this->dsp = dsp;
   }
-  void draw_bg(){
+  void draw_clock_face(){
     switch(cfg->clock_mode & 0x0F)
     {
       case CLOCK_MODE_STARFIELD:
@@ -60,49 +63,55 @@ public:
       case CLOCK_MODE_BREAKOUT:
         draw_breakout();
         break;
+      case CLOCK_MODE_MARIO:
+        draw_mario(); 
+        break; 
+      case CLOCK_MODE_BEN:
+      draw_ben();
+      break;
       default: // CLOCK_MODE_PLAIN
         draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), true, false, true, false);
         break;  
     }
   }
 
-  void draw(){
-  
-    if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
-    {
-      reset_points();
-      last_bg_change = millis();
-      uint8_t new_mode;
-      do{
-         new_mode = (uint8_t)random(CLOCK_MODE_PLAIN) | CLOCK_MODE_RANDOM;
-      }while(new_mode==cfg->clock_mode);
+  void draw();
+  void draw_time(Point h_pos, Point m_pos, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
 
-      cfg->clock_mode = new_mode;
+  void draw_mario(){
+    dsp->fillrect(0,0,16,16, CRGB::Black);
+    for(int i=0;i<256;++i)
+    {
+      int idx = (colorIndex%mario_frames)*768 + i*3;
+      byte r = pgm_read_byte_near(mario + idx + 0);
+      byte g = pgm_read_byte_near(mario + idx + 1);
+      byte b = pgm_read_byte_near(mario + idx + 2);
+      // draw image shifted one pixel to the right to let more visible space for the clock.
+      dsp->set(i%16 + 1, i/16, CRGB(r,g,b));
     }
-    
-    draw_bg();
-    dsp->repaint();
+    draw_time(Point(0,0), Point(0, 7), false, true, false, true);
+
+    if(millis()-last_update>500){
+      colorIndex++;
+      last_update = millis();
+    }
   }
 
-  void draw_time(Point h_pos, Point m_pos, bool clear_before_draw, bool compact, bool overlay, bool force_redraw){
-    int nhh = hour();
-    int nmm = minute();
+  void draw_ben(){
+    dsp->fillrect(0,0,16,16, CRGB::Black);
+    for(int i=0;i<256;++i)
+    {
+      int idx = (colorIndex%ben_frames)*768 + i*3;
+      byte r = pgm_read_byte_near(ben + idx + 0);
+      byte g = pgm_read_byte_near(ben + idx + 1);
+      byte b = pgm_read_byte_near(ben + idx + 2);
+      dsp->set(i%16, i/16, CRGB(r,g,b));
+    }
+    draw_time(Point(8,0), Point(8, 7), false, true, false, true);
 
-    if(nhh!=hh || nmm!=mm || force_redraw)
-    { // only draw if needed.
-      String hstr,mstr;
-      if(clear_before_draw){
-        hstr = format_digit(hh);
-        mstr = format_digit(mm);
-        dsp->draw_string(hstr, h_pos.x, h_pos.y, CRGB::Black, compact, overlay);
-        dsp->draw_string(mstr, m_pos.x, m_pos.y, CRGB::Black, compact, overlay);
-      }
-      hh = nhh;
-      mm = nmm;
-      hstr = format_digit(nhh);
-      mstr = format_digit(nmm);
-      dsp->draw_string(hstr, h_pos.x, h_pos.y, CRGB::Yellow, compact, overlay);
-      dsp->draw_string(mstr, m_pos.x, m_pos.y, CRGB::SteelBlue, compact, overlay);
+    if(millis()-last_update>200){
+      colorIndex++;
+      last_update = millis();
     }
   }
 
@@ -211,9 +220,7 @@ public:
     }
     dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
 
-
     draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), false, false, true, true);
-
   }
 
   void draw_breakout(){
@@ -225,21 +232,27 @@ public:
     Point *b = &h_points[PB];
     CRGB tx = dsp->get(b->x+dx, b->y);
     CRGB ty = dsp->get(b->x, b->y+dy);    
-    if(ty[0]!=0 || ty[1]!=0 || ty[2]!=0){
+    
+    if(ty[0]|ty[1]|ty[2]!=0){
       dy = -dy;
     }
-    else if(tx[0]!=0 || tx[1]!=0 || tx[2]!=0){
+    if(tx[0]|tx[1]|tx[2]!=0){
       dx = -dx;
     }
 
     // check that ball is in bounds
+    if(h_points[PB].y+dy==-1){
+      dy = -dy;
+    }
+
+    if(h_points[PB].y+dy==MATRIX_HEIGHT-1){
+      if(random(3)==1) dx = -dx;
+      dy = -dy;
+    }
+
     if(h_points[PB].x + dx==-1 || h_points[PB].x + dx==MATRIX_WIDTH)
     {
       dx = -dx;
-    }
-    if(h_points[PB].y+dy==-1 || h_points[PB].y+dy==MATRIX_HEIGHT-1){
-      dy = -dy;
-      if(random(3)==1) dx = -dx;
     }
     
     h_points[PB].x += dx;
@@ -268,7 +281,6 @@ public:
       dsp->get(h_points[i].x, h_points[i].y).nscale8(amount);
     }    
   }
-
 
   void reset_points(){
     for(int8_t i=0; i<CLOCK_NUM_POINTS; i++){
@@ -332,6 +344,7 @@ public:
 
   uint8_t snake_head;
   unsigned long last_bg_change;
+  unsigned long last_update;
   
   Point h_points[CLOCK_NUM_POINTS];
   

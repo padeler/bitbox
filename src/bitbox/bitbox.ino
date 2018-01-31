@@ -1,6 +1,3 @@
-#include <TimeLib.h>
-#include <Wire.h>
-#include <DS1307RTC.h>
 
 #include "config.h"
 #include "display.h"
@@ -87,6 +84,9 @@ void loop() {
       dsp->flush_buffer();
       last_repaint = t;
     }
+//    else{ // temporal dithering gives better colors but also ads a lot of flickering.
+//      FastLED.delay(15);
+//    }
   }
 }
 
