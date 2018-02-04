@@ -1,14 +1,12 @@
 #pragma once 
 
+#include <TimeLib.h>
+#include <Wire.h>
+#include <DS1307RTC.h>
+
 #include <stdint.h>
 #include <WString.h>
 
-#define CLOCK_MODE_STARFIELD 0
-#define CLOCK_MODE_SNAKE 1
-#define CLOCK_MODE_PONG 2
-#define CLOCK_MODE_BREAKOUT 3
-#define CLOCK_MODE_PLAIN 4 // also max
-#define CLOCK_MODE_RANDOM 128
 
 #define MAX_BRIGHTNESS 40 
 
@@ -25,6 +23,16 @@
 #define CLOCK_SLEEP 2000 // wait this amount of millis from last image received from serial.
 #define CLOCK_UPDATE 125 // redraw clock  at most this often
 
+#define CLOCK_MODE_STARFIELD 0
+#define CLOCK_MODE_SNAKE 1
+#define CLOCK_MODE_PONG 2
+#define CLOCK_MODE_BREAKOUT 3
+#define CLOCK_MODE_MARIO 4
+#define CLOCK_MODE_PLAIN 5 // also max
+#define CLOCK_MODE_RANDOM 128
+
+
+
 #define DEFAULT_TIME  1514589221 
 
 class Config
@@ -40,7 +48,7 @@ public:
     sync_time = DEFAULT_TIME;
     clock_mode = CLOCK_MODE_RANDOM;
     clock_change_bg = 300000; 
-    brightness = 10;
+    brightness = 15;
     last_image_received = 0;
   }
 

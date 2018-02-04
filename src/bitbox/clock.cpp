@@ -11,7 +11,7 @@ void Clock::draw(){
 
   if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
   {
-    reset_points();
+    reset_clock_face();
     last_bg_change = millis();
     uint8_t new_mode;
     do{
@@ -25,7 +25,7 @@ void Clock::draw(){
   dsp->repaint();
 }
 
-void Clock::draw_time(Point h_pos, Point m_pos, bool clear_before_draw, bool compact, bool overlay, bool force_redraw){
+void Clock::draw_time(const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw){
   int nhh = hour();
   int nmm = minute();
 
@@ -35,15 +35,15 @@ void Clock::draw_time(Point h_pos, Point m_pos, bool clear_before_draw, bool com
     if(clear_before_draw){
       hstr = format_digit(hh);
       mstr = format_digit(mm);
-      dsp->draw_string(hstr, h_pos.x, h_pos.y, CRGB::Black, compact, overlay);
-      dsp->draw_string(mstr, m_pos.x, m_pos.y, CRGB::Black, compact, overlay);
+      dsp->draw_string(hstr, h_pos.x, h_pos.y, CRGB::Black, compact, false);
+      dsp->draw_string(mstr, m_pos.x, m_pos.y, CRGB::Black, compact, false);
     }
     hh = nhh;
     mm = nmm;
     hstr = format_digit(nhh);
     mstr = format_digit(nmm);
-    dsp->draw_string(hstr, h_pos.x, h_pos.y, CRGB::Yellow, compact, overlay);
-    dsp->draw_string(mstr, m_pos.x, m_pos.y, CRGB::SteelBlue, compact, overlay);
+    dsp->draw_string(hstr, h_pos.x, h_pos.y, h_color, compact, overlay);
+    dsp->draw_string(mstr, m_pos.x, m_pos.y, m_color, compact, overlay);
   }
 }
 

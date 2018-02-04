@@ -4,7 +4,6 @@
 #include "display.h"
 
 #include "mario.h"
-#include "ben.h"
 
 // Pong defines
 #define PL 1 
@@ -33,16 +32,8 @@ public:
       MM_X = 4;
       MM_Y = 7;
 
-      hh=-1;
-      mm=-1;
+      reset_clock_face();
 
-      reset_points();
-      snake_head = 0;
-      colorIndex = 0;
-      delta_color = 1;
-      motion = 1;
-      dx = 1;
-      dy = 1;
       last_bg_change = millis() - cfg->clock_change_bg;
       last_update = 0;
       this->cfg = cfg;
@@ -66,17 +57,14 @@ public:
       case CLOCK_MODE_MARIO:
         draw_mario(); 
         break; 
-      case CLOCK_MODE_BEN:
-      draw_ben();
-      break;
       default: // CLOCK_MODE_PLAIN
-        draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), true, false, true, false);
+        draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, true, false, true, false);
         break;  
     }
   }
 
   void draw();
-  void draw_time(Point h_pos, Point m_pos, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
+  void draw_time(const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
 
   void draw_mario(){
     dsp->fillrect(0,0,16,16, CRGB::Black);
@@ -89,27 +77,9 @@ public:
       // draw image shifted one pixel to the right to let more visible space for the clock.
       dsp->set(i%16 + 1, i/16, CRGB(r,g,b));
     }
-    draw_time(Point(0,0), Point(0, 7), false, true, false, true);
+    draw_time(Point(0,0), Point(0, 8),CRGB::DeepSkyBlue,CRGB::GreenYellow, false, true, false, true);
 
-    if(millis()-last_update>500){
-      colorIndex++;
-      last_update = millis();
-    }
-  }
-
-  void draw_ben(){
-    dsp->fillrect(0,0,16,16, CRGB::Black);
-    for(int i=0;i<256;++i)
-    {
-      int idx = (colorIndex%ben_frames)*768 + i*3;
-      byte r = pgm_read_byte_near(ben + idx + 0);
-      byte g = pgm_read_byte_near(ben + idx + 1);
-      byte b = pgm_read_byte_near(ben + idx + 2);
-      dsp->set(i%16, i/16, CRGB(r,g,b));
-    }
-    draw_time(Point(8,0), Point(8, 7), false, true, false, true);
-
-    if(millis()-last_update>200){
+    if(millis()-last_update>250){
       colorIndex++;
       last_update = millis();
     }
@@ -130,7 +100,7 @@ public:
     colorIndex += delta_color;
     if(colorIndex==0) delta_color = -delta_color;
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), false, false, true, true);
+    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), CRGB::Yellow, CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_snake(){
@@ -184,7 +154,7 @@ public:
     colorIndex += delta_color;
     if(delta_color==0) delta_color = -delta_color;      
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), false, false, true, true);
+    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_pong(){
@@ -215,31 +185,41 @@ public:
     dsp->fillrect(0,0,1,MATRIX_HEIGHT, CRGB::Black);
     dsp->fillrect(MATRIX_WIDTH-1,0,1,MATRIX_HEIGHT, CRGB::Black);
     for(int8_t i=-1; i<2; i++){
-       dsp->set(h_points[PL+i].x, h_points[PL+i].y, CRGB::Green);
-       dsp->set(h_points[PR+i].x, h_points[PR+i].y, CRGB::Blue);
+       dsp->set(h_points[PL+i].x, h_points[PL+i].y, CRGB::Yellow);
+       dsp->set(h_points[PR+i].x, h_points[PR+i].y, CRGB::SteelBlue);
     }
-    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
+    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::OrangeRed);
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), false, false, true, true);
+    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_breakout(){
-    dsp->fadetoblack(0,0,16,16, 128);
+    dsp->fadetoblack(0,8,16,7, 128);
 
+    if(h_points[PB].y<8){ 
+      dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Black);
+    }
     // pad indices 0,1,2
     // ball pad 6
-    
-    Point *b = &h_points[PB];
-    CRGB tx = dsp->get(b->x+dx, b->y);
-    CRGB ty = dsp->get(b->x, b->y+dy);    
-    
-    if(ty[0]|ty[1]|ty[2]!=0){
-      dy = -dy;
-    }
-    if(tx[0]|tx[1]|tx[2]!=0){
-      dx = -dx;
-    }
 
+    Point *b = &h_points[PB];
+    if(b->y<=8)
+    {
+      CRGB tx = dsp->get(b->x+dx, b->y);
+      CRGB ty = dsp->get(b->x, b->y+dy);    
+      
+      if(ty[0]|ty[1]|ty[2]!=0){
+        ty.nscale8(32);
+        dsp->set(b->x, b->y+dy, ty);
+        dy = -dy;
+      }
+      else if(tx[0]|tx[1]|tx[2]!=0){
+        tx.nscale8(32);
+        dsp->set(b->x+dx, b->y, tx);
+        dx = -dx;
+      }
+    }
+    
     // check that ball is in bounds
     if(h_points[PB].y+dy==-1){
       dy = -dy;
@@ -267,7 +247,7 @@ public:
     }
     dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
 
-    draw_time(Point(0,0), Point(8, 0), false, true, true, true);
+    draw_time(Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, false);
   }
 
   void clear_points(){
@@ -282,7 +262,17 @@ public:
     }    
   }
 
-  void reset_points(){
+  void reset_clock_face(){
+    dsp->fillrect(0,0,16,16, CRGB::Black);
+    hh=-1;
+    mm=-1;
+    snake_head = 0;
+    colorIndex = 0;
+    delta_color = 1;
+    motion = 1;
+    dx = 1;
+    dy = 1;
+    
     for(int8_t i=0; i<CLOCK_NUM_POINTS; i++){
        h_points[i].x = MATRIX_WIDTH/2;
        h_points[i].y = MATRIX_HEIGHT/2;
