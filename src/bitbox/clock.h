@@ -27,11 +27,7 @@ class Clock{
 
 public:
   Clock(Config *cfg, Display *dsp){
-      HH_X = 2;
-      HH_Y = 0;
-      MM_X = 4;
-      MM_Y = 7;
-
+    
       reset_clock_face();
 
       last_bg_change = millis() - cfg->clock_change_bg;
@@ -58,7 +54,7 @@ public:
         draw_mario(); 
         break; 
       default: // CLOCK_MODE_PLAIN
-        draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, true, false, true, false);
+        draw_time(Point(2, 0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, true, false, true, false);
         break;  
     }
   }
@@ -100,7 +96,7 @@ public:
     colorIndex += delta_color;
     if(colorIndex==0) delta_color = -delta_color;
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y), CRGB::Yellow, CRGB::SteelBlue, false, false, true, true);
+    draw_time(Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_snake(){
@@ -154,7 +150,7 @@ public:
     colorIndex += delta_color;
     if(delta_color==0) delta_color = -delta_color;      
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
+    draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_pong(){
@@ -190,7 +186,7 @@ public:
     }
     dsp->set(h_points[PB].x, h_points[PB].y, CRGB::OrangeRed);
 
-    draw_time(Point(HH_X,HH_Y), Point(MM_X, MM_Y),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
+    draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
   }
 
   void draw_breakout(){
@@ -207,17 +203,25 @@ public:
     {
       CRGB tx = dsp->get(b->x+dx, b->y);
       CRGB ty = dsp->get(b->x, b->y+dy);    
-      
+      CRGB t = dsp->get(b->x+dx, b->y+dy);    
+
       if(ty[0]|ty[1]|ty[2]!=0){
-        ty.nscale8(32);
+        ty.nscale8_video(200);
         dsp->set(b->x, b->y+dy, ty);
         dy = -dy;
       }
       else if(tx[0]|tx[1]|tx[2]!=0){
-        tx.nscale8(32);
+        tx.nscale8_video(200);
         dsp->set(b->x+dx, b->y, tx);
         dx = -dx;
       }
+      else if(t[0]|t[1]|t[2]!=0){
+        t.nscale8_video(200);
+        dsp->set(b->x+dx, b->y+dy, t);
+        dy = -dy;
+        dx = -dx;
+      }
+
     }
     
     // check that ball is in bounds
@@ -329,9 +333,6 @@ public:
   Config *cfg;
   Display *dsp;
   
-  uint8_t HH_X, HH_Y;
-  uint8_t MM_X, MM_Y;
-
   uint8_t snake_head;
   unsigned long last_bg_change;
   unsigned long last_update;
