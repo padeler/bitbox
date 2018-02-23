@@ -28,7 +28,8 @@
 #define CLOCK_MODE_PONG 2
 #define CLOCK_MODE_BREAKOUT 3
 #define CLOCK_MODE_MARIO 4
-#define CLOCK_MODE_PLAIN 5 // also max
+#define CLOCK_MODE_MATRIX 5
+#define CLOCK_MODE_PLAIN 6 // also max
 #define CLOCK_MODE_RANDOM 128
 
 
@@ -48,7 +49,7 @@ public:
     sync_time = DEFAULT_TIME;
     clock_mode = CLOCK_MODE_RANDOM;
     clock_change_bg = 300000; 
-    brightness = 15;
+    brightness = 10;
     last_image_received = 0;
   }
 

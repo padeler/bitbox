@@ -22,7 +22,7 @@ struct Point{
   int8_t x,y;
 };
 
-#define CLOCK_NUM_POINTS 10
+#define CLOCK_NUM_POINTS 8
 class Clock{
 
 public:
@@ -53,6 +53,9 @@ public:
       case CLOCK_MODE_MARIO:
         draw_mario(); 
         break; 
+       case CLOCK_MODE_MATRIX:
+        draw_matrix();
+        break;
       default: // CLOCK_MODE_PLAIN
         draw_time(Point(2, 0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, true, false, true, false);
         break;  
@@ -62,6 +65,20 @@ public:
   void draw();
   void draw_time(const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
 
+  void draw_matrix(){
+    dsp->fadetoblack(0,0,16,16, 253);
+    for(int i=0;i<CLOCK_NUM_POINTS;++i){
+        h_points[i].y = (h_points[i].y+1);
+        dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(ForestColors_p, colorIndex));
+        if(h_points[i].y>MATRIX_HEIGHT){
+          h_points[i].x = random(CLOCK_NUM_POINTS*3) % MATRIX_WIDTH;
+          h_points[i].y = -1 - random(CLOCK_NUM_POINTS);
+        }
+    }
+    colorIndex = (colorIndex + delta_color) % 64;
+    draw_time(Point(2, 0), Point(4, 7), CRGB(0x1F2F2F), CRGB(0x1F2F2F), true, false, false, true);
+  }
+  
   void draw_mario(){
     dsp->fillrect(0,0,16,16, CRGB::Black);
     for(int i=0;i<256;++i)
@@ -73,7 +90,7 @@ public:
       // draw image shifted one pixel to the right to let more visible space for the clock.
       dsp->set(i%16 + 1, i/16, CRGB(r,g,b));
     }
-    draw_time(Point(0,0), Point(0, 8),CRGB::DeepSkyBlue,CRGB::GreenYellow, false, true, false, true);
+    draw_time(Point(0,0), Point(0, 8),CRGB::White,CRGB::White, false, false, false, true);
 
     if(millis()-last_update>250){
       colorIndex++;
@@ -86,8 +103,10 @@ public:
 
     for(int i=0;i<CLOCK_NUM_POINTS;++i){
         h_points[i].x = (h_points[i].x-1);
-        dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
-        
+        CRGB c = dsp->get(h_points[i].x, h_points[i].y);
+        if(c[0]|c[1]|c[2]==0){
+          dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
+        }
         if(h_points[i].x<0){
           h_points[i].x = random(CLOCK_NUM_POINTS*10);
           h_points[i].y = random(CLOCK_NUM_POINTS*10) % MATRIX_HEIGHT;
@@ -206,17 +225,17 @@ public:
       CRGB t = dsp->get(b->x+dx, b->y+dy);    
 
       if(ty[0]|ty[1]|ty[2]!=0){
-        ty.nscale8_video(200);
+        ty.nscale8_video(220);
         dsp->set(b->x, b->y+dy, ty);
         dy = -dy;
       }
       else if(tx[0]|tx[1]|tx[2]!=0){
-        tx.nscale8_video(200);
+        tx.nscale8_video(220);
         dsp->set(b->x+dx, b->y, tx);
         dx = -dx;
       }
       else if(t[0]|t[1]|t[2]!=0){
-        t.nscale8_video(200);
+        t.nscale8_video(220);
         dsp->set(b->x+dx, b->y+dy, t);
         dy = -dy;
         dx = -dx;
