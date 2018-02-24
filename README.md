@@ -29,11 +29,11 @@ Since I will most probably make changes in the future, I used connectors whereve
 ![matrix1](/photos/matrix1.jpg)
 Testing the leds to make sure all are working ok.
 ![screen test without diffuser](/photos/mario0.jpg)
-In order to get a nice "pixel" effect a diffuser is needed. For this test I used a piece of A4 paper.
+In order to get a nice "pixel" effect a diffuser is needed. Here the diffuser is a piece of A4 paper.
 ![screen test with paper diffuser](/photos/mario1.jpg)
-For the final assembly I used a 5mm piece of tinted plexiglas and a thinner piece of paper. 
+For the final assembly, a 5mm piece of tinted plexiglas and a thinner piece of paper is used. 
 ![Grid on led matrix](/photos/grid0.jpg)
-I [3D printed](/model/diffuser_grid.scad) a grid to go between the diffuser and the LED panel. 
+A [3D printed](/model/diffuser_grid.scad) grid goes between the diffuser and the LED panel. 
 This helps create a nice "square" pixel effect.
 ![diffuser grid and wooden frame](/photos/grid.jpg)
 Putting everything together. The wooden frame before painting.
@@ -43,7 +43,7 @@ Testing the clock function. Here the just a paper diffuser is used.
 More testing with the tinted plexiglas diffuser. The clock set to the "pong" clock-face.
 ![test with Plexiglas diffuser](/photos/test_tinted_plexiglass.jpg)
 ![test tinted Plexiglas closeup](/photos/tinted_plexiglass2.jpg)
-I used a 3mm piece of white plexiglas for the back cover. 
+A 3mm piece of white plexiglas is used for the back cover. 
 ![back side plexiglas](/photos/back_plexiglass.jpg)
 The USB port is used for powering the frame and electronics and for serial connection with the arduino.
 ![USB port for power and serial comm](/photos/usb_port.jpg)
