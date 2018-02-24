@@ -1,9 +1,9 @@
 # bitbox
 RGB Led matrix for clock/weather/info/animations.
 
-Bitbox is a RGB LED matrix controled using an arduino board. It compines the functions of the [GameFrame](https://ledseq.com/product/game-frame) by LEDSEQ and the [RibbaPi](https://github.com/stahlfabrik/RibbaPi). 
+Bitbox is a RGB LED matrix controlled using an arduino board. It combines the functions of the [GameFrame](https://ledseq.com/product/game-frame) by LEDSEQ and the [RibbaPi](https://github.com/stahlfabrik/RibbaPi). 
 
-Bitbox can work as a standalone devide displaying data/time or controled over USB to display images send by the host.
+Bitbox can work as a standalone divide displaying data/time or controlled over USB to display images send by the host.
 
 
 This repository contains arduino code and build notes for the bitbox display.
@@ -16,7 +16,7 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 - [Time](https://www.pjrc.com/teensy/td_libs_Time.html)
 - [DS1307RTC](https://github.com/PaulStoffregen/DS1307RTC) 
 
-## Usefull links
+## Useful links
 
 - [Power Topology](https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/power-topology)
 
@@ -30,22 +30,23 @@ Since I will most probably make changes in the future, I used connectors whereve
 Testing the leds to make sure all are working ok.
 ![screen test without diffuser](/photos/mario0.jpg)
 In order to get a nice "pixel" effect a diffuser is needed. For this test I used a piece of A4 paper.
-![screen test with paper diffuset](/photos/mario1.jpg)
-For the final assemply I used a 5mm piece of tinted plexiglass and a thinner piece of paper. 
-![Grid on len matrix](/photos/grid0.jpg)
+![screen test with paper diffuser](/photos/mario1.jpg)
+For the final assembly I used a 5mm piece of tinted plexiglas and a thinner piece of paper. 
+![Grid on led matrix](/photos/grid0.jpg)
 I [3D printed](/model/diffuser_grid.scad) a grid to go between the diffuser and the LED panel. 
 This helps create a nice "square" pixel effect.
 ![diffuser grid and wooden frame](/photos/grid.jpg)
 Putting everything together. The wooden frame before painting.
-![electronics assemply in the wooden frame](/photos/assemply.jpg)
+![electronics assembly in the wooden frame](/photos/assemply.jpg)
 Testing the clock function. Here the just a paper diffuser is used.
 ![test with frame and paper diffuser](/photos/test_paper_diffuser.jpg)
-More testing with the tinted plexiglass diffuser
-![test with plexiglass diffuser](/photos/test_tinted_plexiglass.jpg)
-![test tinted plexiglass closup](/photos/tinted_plexiglass2.jpg)
-I used a 3mm piece of white plexiglass for the back cover. 
-![back side plexiglass](/photos/back_plexiglass.jpg)
-The usb port is used for powering the frame and electronics and for serial connection with the arduino.
-![usb port for power and serial comm](/photos/usb_port.jpg)
-The bitbot running in clock mode.
+More testing with the tinted plexiglas diffuser. The clock set to the "pong" clock-face.
+![test with Plexiglas diffuser](/photos/test_tinted_plexiglass.jpg)
+![test tinted Plexiglas closeup](/photos/tinted_plexiglass2.jpg)
+I used a 3mm piece of white plexiglas for the back cover. 
+![back side plexiglas](/photos/back_plexiglass.jpg)
+The USB port is used for powering the frame and electronics and for serial connection with the arduino.
+![USB port for power and serial comm](/photos/usb_port.jpg)
+The final result: Bitbox in clock mode with the "break-out" clock-face.
 ![final result](/photos/final_result.jpg)
+
