@@ -1,0 +1,13 @@
+
+
+Screen (grid frame): 150x150mm
+Screen (view-able area): 140x140mm
+
+Patoura gia to grid 5mm apo kathe plevra
+
+Wooden frame: 15mm (10mm border, 5mm patoura)
+Depth: 50mm
+Back: dont know
+
+Total dims: 15*2 + 140 = 170mm 
+

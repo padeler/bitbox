@@ -21,8 +21,19 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 - [Power Topology](https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/power-topology)
 
 
-## TODOs
+## Photos 
 
-- Fusebox
-- Separate power supply for arduino and LED panel
-- Diodes
+![matrix0](/photos/matrix0.jpg)
+![matrix1](/photos/matrix1.jpg)
+![screen test without diffuser](/photos/mario0.jpg)
+![screen test with paper diffuset](/photos/mario1.jpg)
+![Grid on len matrix](/photos/grid0.jpg)
+![diffuser grid and wooden frame](/photos/grid.jpg)
+![electronics assemply in the wooden frame](/photos/assemply.jpg)
+![test with frame and paper diffuser](/photos/test_paper_diffuser.jpg)
+![test with plexiglass diffuser](/photos/test_tinted_plexiglass.jpg)
+![test tinted plexiglass closup](/photos/tinted_plexiglass2.jpg)
+![back side plexiglass](/photos/back_plexiglass.jpg)
+![usb port for power and serial comm](/photos/usb_port.jpg)
+![final result](/photos/final_result.jpg)
+
