@@ -3,7 +3,7 @@ RGB Led matrix for clock/weather/info/animations.
 
 Bitbox is a RGB LED matrix controlled using an arduino board. It combines the functions of the [GameFrame](https://ledseq.com/product/game-frame) by LEDSEQ and the [RibbaPi](https://github.com/stahlfabrik/RibbaPi). 
 
-Bitbox can work as a standalone divide displaying data/time or controlled over USB to display images send by the host.
+Bitbox can work as a standalone device displaying data/time or controlled over USB to display images send by the host.
 
 
 This repository contains arduino code and build notes for the bitbox display.
