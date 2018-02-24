@@ -21,7 +21,7 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 - [Power Topology](https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/power-topology)
 
 
-## Makingof bitbox 
+## Making-of bitbox 
 
 The 16x16 matrix is made of four 8x8 panels of WS2812 RGB LEDs I got from [hobbyking](https://hobbyking.com/en_us/2812-8-8-64-bit-full-color-5050-rgb-led-module.html).
 ![matrix0](/photos/matrix0.jpg)
