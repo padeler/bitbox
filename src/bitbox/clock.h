@@ -75,25 +75,24 @@ public:
           h_points[i].y = -1 - random(CLOCK_NUM_POINTS);
         }
     }
-    colorIndex = (colorIndex + delta_color) % 64;
-    draw_time(Point(2, 0), Point(4, 7), CRGB(0x1F2F2F), CRGB(0x1F2F2F), true, false, false, true);
+    colorIndex = (colorIndex + delta_color) % 44;
+    draw_time(Point(0, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, false, true);
   }
   
   void draw_mario(){
     dsp->fillrect(0,0,16,16, CRGB::Black);
-    for(int i=0;i<256;++i)
-    {
-      int idx = (colorIndex%mario_frames)*768 + i*3;
-      byte r = pgm_read_byte_near(mario + idx + 0);
-      byte g = pgm_read_byte_near(mario + idx + 1);
-      byte b = pgm_read_byte_near(mario + idx + 2);
-      // draw image shifted one pixel to the right to let more visible space for the clock.
-      dsp->set(i%16 + 1, i/16, CRGB(r,g,b));
-    }
+    int offset = (motion%mario_frames)*(mario_width*mario_height*3);
+
+    dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
     draw_time(Point(0,0), Point(0, 8),CRGB::White,CRGB::White, false, false, false, true);
 
     if(millis()-last_update>250){
-      colorIndex++;
+      
+      if(motion+dx>=mario_frames || motion+dx<0){
+        dx = -dx;
+      }
+      
+      motion += dx;
       last_update = millis();
     }
   }
@@ -203,7 +202,7 @@ public:
        dsp->set(h_points[PL+i].x, h_points[PL+i].y, CRGB::Yellow);
        dsp->set(h_points[PR+i].x, h_points[PR+i].y, CRGB::SteelBlue);
     }
-    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::OrangeRed);
+    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::White);
 
     draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
   }

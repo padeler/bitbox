@@ -26,6 +26,7 @@ public:
   void overlay(int x, int y, CRGB color);
 
   void fillrect(int x, int y, int width, int height, CRGB color);
+  void drawImage_pm(const byte *buf, int offset, int8_t x, int8_t y, uint8_t width, uint8_t height);
 
   void fadetoblack(int x, int y, int width, int height, uint8_t amount);
   

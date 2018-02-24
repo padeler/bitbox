@@ -69,6 +69,18 @@ void Display::draw_char(char c, int top_left_x, int top_left_y, CRGB color, bool
   }
 }
 
+void Display::drawImage_pm(const byte *buf, int offset, int8_t x, int8_t y, uint8_t width, uint8_t height)
+{
+    for(int i=0;i<width*height;++i)
+    {
+      int idx = offset + i*3;
+      byte r = pgm_read_byte_near(buf + idx + 0);
+      byte g = pgm_read_byte_near(buf + idx + 1);
+      byte b = pgm_read_byte_near(buf + idx + 2);
+      set(x + i%width, y + i/width, CRGB(r,g,b));
+    }
+}
+
 void Display::fillrect(int x, int y, int width, int height, CRGB color)
 {
   for(int col=x;col<x+width;++col)

@@ -24,9 +24,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
 //  Serial.begin(230400);
-  while (!Serial) ; // Needed for Leonardo only
+//  while (!Serial) ; // Needed for Leonardo only
   Serial.setTimeout(1000);
-  
   randomSeed(analogRead(0));
   
   // TODO load config from EEPROM
