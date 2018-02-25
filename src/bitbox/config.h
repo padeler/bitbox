@@ -29,7 +29,8 @@
 #define CLOCK_MODE_BREAKOUT 3
 #define CLOCK_MODE_MARIO 4
 #define CLOCK_MODE_MATRIX 5
-#define CLOCK_MODE_PLAIN 6 // also max
+#define CLOCK_MODE_FIRE 6
+#define CLOCK_MODE_PLAIN 7 // also max
 #define CLOCK_MODE_RANDOM 128
 
 

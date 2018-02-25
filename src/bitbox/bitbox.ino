@@ -23,8 +23,6 @@ unsigned long last_repaint = 0;
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
-//  Serial.begin(230400);
-//  while (!Serial) ; // Needed for Leonardo only
   Serial.setTimeout(1000);
   randomSeed(analogRead(0));
   
@@ -37,8 +35,9 @@ void setup() {
   clk = new Clock(&cfg, dsp);
 
   // init communication handler
-  handler = new CommHandler(&cfg, dsp);
-
+  if(Serial) handler = new CommHandler(&cfg, dsp);
+  else handler = NULL;
+  
   setSyncProvider(RTC.get);
   if(timeStatus() != timeSet)
   {
@@ -57,7 +56,7 @@ void serialEvent()
   while(Serial.available()>0)
   {
     int val = Serial.read();
-    if(val>=0)
+    if(val>=0 && handler)
     {
       handler->process(val);
     }
@@ -68,7 +67,7 @@ void serialEvent()
 void loop() {
   
   
-  if(handler->isReceiving()){
+  if(handler && handler->isReceiving()){
     handler->check_timeout();
   }
   
