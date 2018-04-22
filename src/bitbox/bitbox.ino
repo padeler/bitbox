@@ -41,7 +41,7 @@ void setup() {
   setSyncProvider(RTC.get);
   if(timeStatus() != timeSet)
   {
-    setTime(cfg.sync_time);
+    setTime(DEFAULT_TIME);
     Serial.println("Unable to sync with the RTC");
   }
   else
@@ -77,7 +77,7 @@ void loop() {
     if(t-last_clock_update>CLOCK_UPDATE && abs(t-cfg.last_image_received)>CLOCK_SLEEP){
       clk->draw();
       last_clock_update = t;
-    }
+    }    
     if(t-last_repaint>MIN_REPAINT){
       dsp->flush_buffer();
       last_repaint = t;

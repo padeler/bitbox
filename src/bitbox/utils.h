@@ -113,7 +113,7 @@ public:
           Serial.println("Failed to parse config");
         }
         
-        dsp->reconfigure();
+        dsp->set_brightness(cfg->brightness);
 
         break;
 

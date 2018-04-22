@@ -8,7 +8,12 @@
 #include <WString.h>
 
 
-#define MAX_BRIGHTNESS 40 
+#define MAX_BRIGHTNESS 20 
+#define NIGHT_BRIGHTNESS 5
+#define DAY_BRIGHTNESS 10
+
+#define NIGHT_HOUR 23
+#define DAY_HOUR 8
 
 #define PACKET_TYPE_NOTSET 0
 #define PACKET_TYPE_SETTINGS 1
@@ -40,23 +45,20 @@
 class Config
 {
 public:
-  unsigned long default_time, sync_time;
   unsigned long clock_change_bg;// if clock_mode&CLOCK_MODE_RANDOM then change bg every this amount of millis
   uint8_t clock_mode;
   uint8_t brightness;
   unsigned int last_image_received;
  
   Config(){
-    sync_time = DEFAULT_TIME;
-    clock_mode = CLOCK_MODE_RANDOM;
+    clock_mode = CLOCK_MODE_FIRE & CLOCK_MODE_RANDOM;
     clock_change_bg = 300000; 
-    brightness = 10;
+    brightness = DAY_BRIGHTNESS;
     last_image_received = 0;
   }
 
   String to_string(){
-    String res = String(sync_time) + " " +
-                 String(clock_mode)   + " " +
+    String res = String(clock_mode)   + " " +
                  String(brightness)   + " ";
 
     return res;
@@ -65,11 +67,6 @@ public:
   bool from_string(String str){
     unsigned int start=0, idx=0;
     
-    idx = str.indexOf(' ', start); // time
-    if(idx<0) return false;
-    sync_time = str.substring(start, idx).toInt();
-    start = idx+1;
-
     idx = str.indexOf(' ', start); // clock_mode
     if(idx<0) return false;
     clock_mode = str.substring(start, idx).toInt();

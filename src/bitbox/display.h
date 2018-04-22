@@ -34,9 +34,11 @@ public:
     fillrect(0, 0, MATRIX_WIDTH, MATRIX_HEIGHT, CRGB(0,0,0));
   }
 
-  inline void reconfigure()
+  inline void set_brightness(uint8_t br)
   {
-    FastLED.setBrightness(cfg->brightness);
+    if(br<MAX_BRIGHTNESS){
+      FastLED.setBrightness(br);    
+    }
   }
 
   inline void flush_buffer()

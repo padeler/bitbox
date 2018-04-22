@@ -11,7 +11,7 @@ Display::Display(Config *cfg){
   // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
   // update settings using config
-  reconfigure();
+  set_brightness(cfg->brightness);
   
   // clear screen
   clear_display();

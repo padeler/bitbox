@@ -26,15 +26,15 @@ class Clock{
 public:
   Clock(Config *cfg, Display *dsp){
     
-      reset_clock_face();
-
+      clock_mode = CLOCK_MODE_FIRE;
       last_bg_change = millis() - cfg->clock_change_bg;
       last_update = 0;
+      reset_clock_face();
       this->cfg = cfg;
       this->dsp = dsp;
   }
   void draw_clock_face(){
-    switch(cfg->clock_mode & 0x0F)
+    switch(clock_mode & 0x0F)
     {
       case CLOCK_MODE_STARFIELD:
         draw_starfield();
@@ -58,7 +58,7 @@ public:
         draw_fire();
         break;
       default: // CLOCK_MODE_PLAIN
-        draw_time(Point(2, 0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, true, false, true, false);
+        draw_time(Point(2, 0), Point(5, 8),CRGB::White,CRGB::White, true, false, true, false);
         break;  
     }
   }
@@ -93,7 +93,9 @@ public:
   
   int hh,mm;
   int8_t delta_color;
-  int8_t dx,dy, motion;
+  int8_t dx,dy;
+  int8_t motion;
+  uint8_t clock_mode;
   uint8_t colorIndex;
   Config *cfg;
   Display *dsp;

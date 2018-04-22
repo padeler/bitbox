@@ -11,18 +11,22 @@ inline String format_digit(int d){
 
 void Clock::draw(){
 
-  if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
+  if(hour()>=DAY_HOUR && hour()<=NIGHT_HOUR)
   {
-    reset_clock_face();
-    last_bg_change = millis();
-    uint8_t new_mode;
-    do{
-       new_mode = (uint8_t)random(CLOCK_MODE_PLAIN) | CLOCK_MODE_RANDOM;
-    }while(new_mode==cfg->clock_mode);
+    dsp->set_brightness(cfg->brightness);
 
-    cfg->clock_mode = new_mode;
+    if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
+    {
+      reset_clock_face();
+      last_bg_change = millis();
+      clock_mode = (clock_mode + (uint8_t)random(CLOCK_MODE_PLAIN-1))% CLOCK_MODE_PLAIN;
+    }
   }
-  
+  else{ // night time, use plain clock mode
+    dsp->set_brightness(NIGHT_BRIGHTNESS);
+    reset_clock_face();
+    clock_mode = CLOCK_MODE_PLAIN;
+  }
   draw_clock_face();
   dsp->repaint();
 }
@@ -132,7 +136,7 @@ void Clock::draw_mario(){
   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
   dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
-  draw_time(Point(0,0), Point(0, 8), CRGB(0x85FF85), CRGB(0x70FF70), false, false, false, true);
+  draw_time(Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
 
   if(millis()-last_update>250){
     
@@ -154,7 +158,7 @@ void Clock::draw_fire(){
   draw_time(Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
 
   if(millis()-last_update>100){
-    motion = (motion + dx) % fire_frames;
+    motion = (motion + (int)dx) % fire_frames;
     last_update = millis();
   }
 }
@@ -165,10 +169,8 @@ void Clock::draw_starfield(){
 
   for(int i=0;i<CLOCK_NUM_POINTS;++i){
       h_points[i].x = (h_points[i].x-1);
-      CRGB c = dsp->get(h_points[i].x, h_points[i].y);
-      if(c[0]|c[1]|c[2]==0){
-        dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
-      }
+      dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
+
       if(h_points[i].x<0){
         h_points[i].x = random(CLOCK_NUM_POINTS*10);
         h_points[i].y = random(CLOCK_NUM_POINTS*10) % MATRIX_HEIGHT;
@@ -177,7 +179,7 @@ void Clock::draw_starfield(){
   colorIndex += delta_color;
   if(colorIndex==0) delta_color = -delta_color;
 
-  draw_time(Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, true, true);
+  draw_time(Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, false, true);
 }
 
 /* ************ SNAKE FACE ************** */
@@ -272,35 +274,41 @@ void Clock::draw_pong(){
   draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
 }
 
-/* ************ BREAKOUT FACE ************** */
-void Clock::draw_breakout(){
-  dsp->fadetoblack(0,8,16,7, 128);
 
-  if(h_points[PB].y<8){ 
-    dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Black);
-  }
+/* ************ BREAKOUT FACE ************** */
+
+bool break_block(CRGB &bl){
+    if(bl[0]|bl[1]|bl[2]!=0){ // there is a block
+        bl.nscale8_video(180); // change color (make dimmer)
+        return true;
+    }
+    return false;
+}
+    
+
+void Clock::draw_breakout(){
+  // erase ball
+  dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Black);
+
   // pad indices 0,1,2
   // ball pad 6
 
   Point *b = &h_points[PB];
-  if(b->y<=8)
+  if(b->y<=8) // check for block collistions
   {
     CRGB tx = dsp->get(b->x+dx, b->y);
     CRGB ty = dsp->get(b->x, b->y+dy);    
     CRGB t = dsp->get(b->x+dx, b->y+dy);    
 
-    if(ty[0]|ty[1]|ty[2]!=0){
-      ty.nscale8_video(220);
+    if(break_block(ty)){
       dsp->set(b->x, b->y+dy, ty);
       dy = -dy;
     }
-    else if(tx[0]|tx[1]|tx[2]!=0){
-      tx.nscale8_video(220);
+    else if(break_block(tx)){
       dsp->set(b->x+dx, b->y, tx);
       dx = -dx;
     }
-    else if(t[0]|t[1]|t[2]!=0){
-      t.nscale8_video(220);
+    else if(break_block(t)){
       dsp->set(b->x+dx, b->y+dy, t);
       dy = -dy;
       dx = -dx;
@@ -314,7 +322,9 @@ void Clock::draw_breakout(){
   }
 
   if(h_points[PB].y+dy==MATRIX_HEIGHT-1){
-    if(random(3)==1) dx = -dx;
+    if(random(3)==1) {
+        dx = -dx;
+    }
     dy = -dy;
   }
 
