@@ -29,9 +29,9 @@ public:
       clock_mode = CLOCK_MODE_FIRE;
       last_bg_change = millis() - cfg->clock_change_bg;
       last_update = 0;
-      reset_clock_face();
       this->cfg = cfg;
       this->dsp = dsp;
+      reset_clock_face();
   }
   void draw_clock_face(){
     switch(clock_mode & 0x0F)

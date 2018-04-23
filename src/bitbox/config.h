@@ -8,7 +8,7 @@
 #include <WString.h>
 
 
-#define MAX_BRIGHTNESS 20 
+#define MAX_BRIGHTNESS 30 
 #define NIGHT_BRIGHTNESS 5
 #define DAY_BRIGHTNESS 10
 

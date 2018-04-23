@@ -66,12 +66,12 @@ void serialEvent()
 
 void loop() {
   
-  
   if(handler && handler->isReceiving()){
     handler->check_timeout();
   }
-  
-  else if(Serial.available()==0){ //only if serial IO is not pending
+ 
+  else if(Serial.available()==0)
+  { //only if serial IO is not pending
     unsigned long  t = millis();
     
     if(t-last_clock_update>CLOCK_UPDATE && abs(t-cfg.last_image_received)>CLOCK_SLEEP){
@@ -86,5 +86,6 @@ void loop() {
 //      FastLED.delay(15);
 //    }
   }
+
 }
 
