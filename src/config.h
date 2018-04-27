@@ -51,7 +51,7 @@ public:
   unsigned int last_image_received;
  
   Config(){
-    clock_mode = CLOCK_MODE_FIRE & CLOCK_MODE_RANDOM;
+    clock_mode = CLOCK_MODE_RANDOM;
     clock_change_bg = 300000; 
     brightness = DAY_BRIGHTNESS;
     last_image_received = 0;
