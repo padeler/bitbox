@@ -3,6 +3,28 @@
 #include "config.h"
 #include "display.h"
 
+#define NIGHT_BRIGHTNESS 5
+#define DAY_BRIGHTNESS 10
+
+#define NIGHT_HOUR 23
+#define DAY_HOUR 8
+
+#define CLOCK_MODE_STARFIELD 0
+#define CLOCK_MODE_SNAKE 1
+#define CLOCK_MODE_PONG 2
+#define CLOCK_MODE_BREAKOUT 3
+#define CLOCK_MODE_MARIO 4
+#define CLOCK_MODE_MATRIX 5
+#define CLOCK_MODE_FIRE 6
+#define CLOCK_MODE_PLAIN 7 // also max
+#define CLOCK_MODE_RANDOM 128
+
+#define DEFAULT_CLOCK_MODE CLOCK_MODE_RANDOM
+
+#define DEFAULT_BG_CHANGE 300000 // millis
+#define DEFAULT_TIME  1514589221 
+
+
 // Pong defines
 #define PL 1 
 #define PR 4
@@ -24,12 +46,11 @@ struct Point{
 class Clock{
 
 public:
-  Clock(Config *cfg, Display *dsp){
-    
+  Clock(Display *dsp){
+
       clock_mode = CLOCK_MODE_FIRE;
-      last_bg_change = millis() - cfg->clock_change_bg;
+      last_bg_change = millis() - DEFAULT_BG_CHANGE;
       last_update = 0;
-      this->cfg = cfg;
       this->dsp = dsp;
       reset_clock_face();
   }
@@ -90,14 +111,13 @@ public:
   void update_pong_pad(int8_t idx, int8_t xpos);
   void update_breakout_pad(int8_t idx, int8_t ypos);
 
-  
+
   int hh,mm;
   int8_t delta_color;
   int8_t dx,dy;
   int8_t motion;
   uint8_t clock_mode;
   uint8_t colorIndex;
-  Config *cfg;
   Display *dsp;
   
   uint8_t snake_head;

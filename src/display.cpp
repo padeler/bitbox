@@ -2,9 +2,8 @@
 #include "font.h"
 
 
-Display::Display(Config *cfg){
-  this->cfg = cfg;
-  
+Display::Display(){
+
   animation = NULL;
 
   // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -13,7 +12,7 @@ Display::Display(Config *cfg){
   // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
   // update settings using config
-  set_brightness(cfg->brightness);
+  set_brightness(DEFAULT_BRIGHTNESS);
   
   // clear screen
   clear_display();

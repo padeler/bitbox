@@ -1,3 +1,5 @@
+#include <TimeLib.h>
+
 #include "clock.h"
 #include "fire.h"
 #include "mario.h"
@@ -13,9 +15,9 @@ void Clock::draw(){
 
   if(hour()>=DAY_HOUR && hour()<=NIGHT_HOUR)
   {
-    dsp->set_brightness(cfg->brightness);
+    dsp->set_brightness(DAY_BRIGHTNESS);
 
-    if(cfg->clock_mode & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> cfg->clock_change_bg))
+    if(DEFAULT_CLOCK_MODE & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> DEFAULT_BG_CHANGE))
     {
       reset_clock_face();
       last_bg_change = millis();

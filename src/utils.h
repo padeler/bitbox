@@ -1,8 +1,15 @@
 #pragma once
 
-#include "config.h"
 #include "display.h"
 
+#define PACKET_TYPE_NOTSET 0
+#define PACKET_TYPE_SETTINGS 1
+#define PACKET_TYPE_CLOCK_SYNC 2
+#define PACKET_TYPE_IMAGE 10
+
+#define RCV_TIMEOUT 200  //milliseconds
+
+#define BUF_SIZE 16*3
 
 
 void update_time(byte *buf, int buf_len){
@@ -10,6 +17,30 @@ void update_time(byte *buf, int buf_len){
   unsigned long t = atol((char*)buf);
   RTC.set(t);   // set the RTC and the system time to the received value
   setTime(t);
+}
+
+// FIXME Update to_string and from_string for the config over serial function.
+String to_string(uint8_t clock_mode, uint8_t brightness){
+  String res = String(clock_mode)   + " " +
+                String(brightness)   + " ";
+
+  return res;
+}
+
+bool from_string(String str){
+  unsigned int start=0, idx=0;
+  
+  idx = str.indexOf(' ', start); // clock_mode
+  if(idx<0) return false;
+  uint8_t clock_mode = str.substring(start, idx).toInt();
+  start = idx+1;
+
+  idx = str.indexOf(' ', start); // brightness
+  if(idx<0) return false;
+  uint8_t brightness = str.substring(start, idx).toInt();
+  start = idx+1;
+  
+  return true;
 }
 
 /* ***************************************************************** */
@@ -20,8 +51,7 @@ void update_time(byte *buf, int buf_len){
 class CommHandler {
 
 public:
-  CommHandler(Config *cfg, Display *dsp){
-    this->cfg = cfg;
+  CommHandler(Display *dsp){
     this->dsp = dsp;
     reset();
   }
@@ -102,18 +132,18 @@ public:
     switch(packet_type){
       case PACKET_TYPE_IMAGE:
         dsp->repaint();
-        cfg->last_image_received = millis();
+        // cfg->last_image_received = millis();
         break;
       case PACKET_TYPE_CLOCK_SYNC:
         update_time(buf, pos);
         break;
       case PACKET_TYPE_SETTINGS:
-        res = cfg->from_string(String((char*)buf));
-        if(!res){
-          Serial.println("Failed to parse config");
-        }
+        // res = from_string(String((char*)buf));
+        // if(!res){
+        //   Serial.println("Failed to parse config");
+        // }
         
-        dsp->set_brightness(cfg->brightness);
+        // dsp->set_brightness(cfg->brightness);
 
         break;
 
@@ -132,7 +162,6 @@ public:
   uint16_t pos;
   uint16_t offset;
   byte buf[BUF_SIZE];
-  Config *cfg;
   Display *dsp;
   unsigned long rcv_start;
 };

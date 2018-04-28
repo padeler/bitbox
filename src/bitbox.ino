@@ -1,3 +1,11 @@
+#include <TimeLib.h>
+#include <Wire.h>
+#include <DS1307RTC.h>
+
+#include <stdint.h>
+#include <WString.h>
+
+
 
 #include "config.h"
 #include "display.h"
@@ -5,16 +13,20 @@
 #include "clock.h"
 #include "heart.h"
 
+
+#define MIN_REPAINT 30
+#define CLOCK_UPDATE 125 // redraw clock  at most this often
+
+
 /* ***************************************************************** */
 /* ************************* MAIN SKETCH *************************** */
 /* ***************************************************************** */
 
-
-Config cfg;
-
-Display *dsp;
 CommHandler *handler;
-Clock *clk;
+
+Display dsp;
+Clock clk(&dsp);
+
 
 unsigned long last_clock_update=0;
 unsigned long last_repaint = 0;
@@ -31,14 +43,8 @@ void setup() {
   
   // TODO load config from EEPROM
 
-  // init display.
-  dsp = new Display(&cfg);
-
-  // init clock
-  clk = new Clock(&cfg, dsp);
-
   // init communication handler
-  if(Serial) handler = new CommHandler(&cfg, dsp);
+  if(Serial) handler = new CommHandler(&dsp);
   else handler = NULL;
   
   setSyncProvider(RTC.get);
@@ -72,10 +78,10 @@ void draw_heart(){
   if(millis()-last_upd>100){
     uint8_t har[] = {0,1,1,2,2,2,2,1,1,0};
     last_upd = millis();
-    dsp->fillrect(0,0,16,16, CRGB::Black);
+    dsp.fillrect(0,0,16,16, CRGB::Black);
     int offset = (har[heart_fr%10])*(heart_width*heart_height*3);
-    dsp->drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
-    dsp->repaint();
+    dsp.drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
+    dsp.repaint();
     heart_fr+=1;
   }
 }
@@ -97,14 +103,14 @@ void loop() {
     {
      
       
-      if(t-last_clock_update>CLOCK_UPDATE && abs(t-cfg.last_image_received)>CLOCK_SLEEP){
-        clk->draw();
+      if(t-last_clock_update>CLOCK_UPDATE){
+        clk.draw();
         last_clock_update = t;
       }   
     } 
 
     if(t-last_repaint>MIN_REPAINT){
-      dsp->flush_buffer();
+      dsp.flush_buffer();
       last_repaint = t;
     }
 //    else{ // temporal dithering gives better colors but also ads a lot of flickering.

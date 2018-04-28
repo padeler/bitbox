@@ -9,11 +9,14 @@
 #define MATRIX_WIDTH 16
 #define MATRIX_HEIGHT 16
 
+#define MAX_BRIGHTNESS 30 
+#define DEFAULT_BRIGHTNESS 10
+
 class Animation;
 
 class Display{
 public:
-  Display(Config *cfg);
+  Display();
 
   void update_led(int pos, char val);
   void update_leds(byte *buf, int offset, int buf_size);
@@ -59,7 +62,6 @@ public:
 
   
 private:
-  Config *cfg;
   
   bool repaint_needed;
   
