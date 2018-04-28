@@ -9,6 +9,8 @@
 #define MATRIX_WIDTH 16
 #define MATRIX_HEIGHT 16
 
+class Animation;
+
 class Display{
 public:
   Display(Config *cfg);
@@ -41,17 +43,20 @@ public:
     }
   }
 
-  inline void flush_buffer()
-  {
-    if(repaint_needed){
-      FastLED.show();
-      repaint_needed = false;    
-    }
-  }
+  /* Animation stack methods */ 
+  Animation* animation_pop();
+  void animation_push(Animation *new_anim);
+
+  /* ********************** */
+
+  void flush_buffer();
+
   
   inline void repaint(){
     repaint_needed = true;
   }
+
+
   
 private:
   Config *cfg;
@@ -61,6 +66,19 @@ private:
   // Define the array of leds
   CRGB leds[NUM_LEDS];
 
-
+  Animation *animation; // the top of the animation list
 };
 
+
+class Animation{
+  
+public:
+  virtual ~Animation();
+  /**
+   * Update animation (draw next frame on dsp)
+   * returns: True if the animation has more frames, False if it is finished
+   */
+  virtual bool update(Display *dsp);
+
+  Animation *next;
+};

@@ -3,7 +3,6 @@
 #include "display.h"
 #include "utils.h"
 #include "clock.h"
-
 #include "heart.h"
 
 /* ***************************************************************** */

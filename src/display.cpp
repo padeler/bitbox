@@ -5,6 +5,8 @@
 Display::Display(Config *cfg){
   this->cfg = cfg;
   
+  animation = NULL;
+
   // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
   // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -26,7 +28,7 @@ void Display::draw_string(String str, int x, int y,  CRGB color, bool compact, b
     char_step--; 
   }
   
-  for(int p=0; p<str.length(); ++p)
+  for(uint16_t p=0; p<str.length(); ++p)
   {
     char c = str.charAt(p);
     int cx = x+p*char_step;
@@ -170,4 +172,37 @@ inline int Display::find_index(uint8_t row, uint8_t col){
   }
   return frm_idx;  
 }
+
+  /* Animation stack methods */ 
+  Animation* Display::animation_pop()
+  {
+    Animation *res = animation;
+    if(animation!=NULL){
+      animation = animation->next;
+    }
+    return res;
+  }
+
+  void Display::animation_push(Animation *new_anim){
+    new_anim->next = animation;
+    animation = new_anim; 
+  }
+
+  /* ********************** */
+
+  void Display::flush_buffer()
+  {
+    if(animation!=NULL)
+    {
+      bool finished = animation->update(this);
+      if(finished){
+        Animation *old = animation_pop();
+        delete old; // TODO document memory management properly
+      }
+    }
+    if(repaint_needed){
+      FastLED.show();
+      repaint_needed = false;    
+    }
+  }
 

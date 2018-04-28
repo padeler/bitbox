@@ -278,7 +278,7 @@ void Clock::draw_pong(){
 /* ************ BREAKOUT FACE ************** */
 
 bool break_block(CRGB &bl){
-    if(bl[0]|bl[1]|bl[2]!=0){ // there is a block
+    if((bl[0]|bl[1]|bl[2])!=0){ // there is a block
         bl.nscale8_video(180); // change color (make dimmer)
         return true;
     }
