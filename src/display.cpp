@@ -172,36 +172,67 @@ inline int Display::find_index(uint8_t row, uint8_t col){
   return frm_idx;  
 }
 
-  /* Animation stack methods */ 
-  Animation* Display::animation_pop()
-  {
-    Animation *res = animation;
-    if(animation!=NULL){
-      animation = animation->next;
-    }
-    return res;
+/* Animation stack methods */ 
+Animation* Display::animation_pop()
+{
+  Animation *res = animation;
+  if(animation!=NULL){
+    animation = animation->next;
   }
+  return res;
+}
 
-  void Display::animation_push(Animation *new_anim){
-    new_anim->next = animation;
-    animation = new_anim; 
-  }
+bool Display::animation_delete(Animation *anim)
+{
+  if(anim==NULL) return true;
 
-  /* ********************** */
+  Animation *tmp = animation;
+  Animation *prev = NULL;
 
-  void Display::flush_buffer()
+  while(tmp!=NULL)
   {
-    if(animation!=NULL)
+    if(tmp==anim) // found it
     {
-      bool finished = animation->update(this);
-      if(finished){
-        Animation *old = animation_pop();
-        delete old; // TODO document memory management properly
+      if(prev!=NULL)
+      {
+        prev = tmp->next; // connect the link
       }
+      else{ // this is the first and only animation
+        animation = animation->next;
+      }
+      delete anim;
+      return true;
     }
-    if(repaint_needed){
-      FastLED.show();
-      repaint_needed = false;    
+    else
+    {
+      prev = tmp;
+      tmp = tmp->next;
     }
   }
+  return false;
+}
+
+
+void Display::animation_push(Animation *new_anim){
+  new_anim->next = animation;
+  animation = new_anim; 
+}
+
+/* ********************** */
+
+void Display::flush_buffer()
+{
+  if(animation!=NULL)
+  {
+    bool finished = animation->update(this);
+    if(finished){
+      Animation *old = animation_pop();
+      delete old; // TODO document memory management properly
+    }
+  }
+  if(repaint_needed){
+    FastLED.show();
+    repaint_needed = false;    
+  }
+}
 

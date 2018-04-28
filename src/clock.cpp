@@ -11,29 +11,7 @@ inline String format_digit(int d){
   return s;
 }
 
-void Clock::draw(){
-
-  if(hour()>=DAY_HOUR && hour()<=NIGHT_HOUR)
-  {
-    dsp->set_brightness(DAY_BRIGHTNESS);
-
-    if(DEFAULT_CLOCK_MODE & CLOCK_MODE_RANDOM && ((millis() - last_bg_change)> DEFAULT_BG_CHANGE))
-    {
-      reset_clock_face();
-      last_bg_change = millis();
-      clock_mode = (clock_mode + (uint8_t)random(CLOCK_MODE_PLAIN-1))% CLOCK_MODE_PLAIN;
-    }
-  }
-  else{ // night time, use plain clock mode
-    dsp->set_brightness(NIGHT_BRIGHTNESS);
-    reset_clock_face();
-    clock_mode = CLOCK_MODE_PLAIN;
-  }
-  draw_clock_face();
-  dsp->repaint();
-}
-
-void Clock::draw_time(const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw){
+void ClockFace::draw_time(Display *dsp, const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw){
   int nhh = hour();
   int nmm = minute();
 
@@ -56,7 +34,7 @@ void Clock::draw_time(const Point &h_pos, const Point &m_pos, const CRGB &h_colo
 }
 
 
-void Clock::update_pong_pad(int8_t idx, int8_t xpos){
+void ClockFace::update_pong_pad(int8_t idx, int8_t xpos){
   int8_t goal = MATRIX_HEIGHT/2; // move towards the mid of the screen
   if(abs(h_points[PB].x-h_points[idx].x)<MATRIX_WIDTH/2){ // move towards the ball
     goal = h_points[PB].y;
@@ -77,7 +55,7 @@ void Clock::update_pong_pad(int8_t idx, int8_t xpos){
   
 }
 
-void Clock::update_breakout_pad(int8_t idx, int8_t ypos){
+void ClockFace::update_breakout_pad(int8_t idx, int8_t ypos){
   int8_t goal = MATRIX_WIDTH/2; // move towards the mid of the screen
   if(abs(h_points[PB].y-h_points[idx].y)<MATRIX_HEIGHT/2){ // move towards the ball
     goal = h_points[PB].x;
@@ -98,27 +76,10 @@ void Clock::update_breakout_pad(int8_t idx, int8_t ypos){
   
 }
 
-void Clock::reset_clock_face(){
-  dsp->fillrect(0,0,16,16, CRGB::Black);
-  hh=-1;
-  mm=-1;
-  snake_head = 0;
-  colorIndex = 0;
-  delta_color = 1;
-  motion = 1;
-  dx = 1;
-  dy = 1;
-  
-  for(int8_t i=0; i<CLOCK_NUM_POINTS; i++){
-     h_points[i].x = MATRIX_WIDTH/2;
-     h_points[i].y = MATRIX_HEIGHT/2;
-  }
-}
-
 
 
 /* ************ MATRIX FACE ************** */
-void Clock::draw_matrix(){
+void ClockFace::draw_matrix(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 253);
   for(int i=0;i<CLOCK_NUM_POINTS;++i){
       h_points[i].y = (h_points[i].y+1);
@@ -129,44 +90,44 @@ void Clock::draw_matrix(){
       }
   }
   colorIndex = (colorIndex + delta_color) % 44;
-  draw_time(Point(0, 0), Point(5, 8), CRGB(0x85FF85), CRGB(0x70FF70), true, false, false, true);
+  draw_time(dsp, Point(0, 0), Point(5, 8), CRGB(0x85FF85), CRGB(0x70FF70), true, false, false, true);
 }
 
 /* ************ MARIOFACE ************** */
-void Clock::draw_mario(){
+void ClockFace::draw_mario(Display *dsp){
   dsp->fillrect(0,0,16,16, CRGB::Black);
   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
   dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
-  draw_time(Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
+  draw_time(dsp, Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
 
-  if(millis()-last_update>250){
+  if(millis()-anim_frame>250){
     
     if(motion+dx>=mario_frames || motion+dx<0){
       dx = -dx;
     }
     
     motion += dx;
-    last_update = millis();
+    anim_frame = millis();
   }
 }
 
 /* ************ FIRE FACE ************** */
-void Clock::draw_fire(){
+void ClockFace::draw_fire(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 200);
   int offset = (motion%fire_frames)*(fire_width*fire_height*3);
 
   dsp->drawImage_pm(fire, offset, 0,0, fire_width, fire_height);    
-  draw_time(Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
+  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
 
-  if(millis()-last_update>100){
+  if(millis()-anim_frame>100){
     motion = (motion + (int)dx) % fire_frames;
-    last_update = millis();
+    anim_frame = millis();
   }
 }
 
 /* ************ STARFIELD FACE ************** */
-void Clock::draw_starfield(){
+void ClockFace::draw_starfield(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   for(int i=0;i<CLOCK_NUM_POINTS;++i){
@@ -181,11 +142,11 @@ void Clock::draw_starfield(){
   colorIndex += delta_color;
   if(colorIndex==0) delta_color = -delta_color;
 
-  draw_time(Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, false, true);
+  draw_time(dsp, Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, false, true);
 }
 
 /* ************ SNAKE FACE ************** */
-void Clock::draw_snake(){
+void ClockFace::draw_snake(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   Point *p = &h_points[snake_head];
@@ -236,11 +197,11 @@ void Clock::draw_snake(){
   colorIndex += delta_color;
   if(delta_color==0) delta_color = -delta_color;      
 
-  draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
+  draw_time(dsp, Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
 }
 
 /* ************ PONG FACE ************** */
-void Clock::draw_pong(){
+void ClockFace::draw_pong(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   // left pad indices 0,1,2
@@ -273,7 +234,7 @@ void Clock::draw_pong(){
   }
   dsp->set(h_points[PB].x, h_points[PB].y, CRGB(0xf93500));
 
-  draw_time(Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
+  draw_time(dsp, Point(2,0), Point(4, 7),CRGB::Yellow,CRGB::SteelBlue, false, false, true, true);
 }
 
 
@@ -288,7 +249,7 @@ bool break_block(CRGB &bl){
 }
     
 
-void Clock::draw_breakout(){
+void ClockFace::draw_breakout(Display *dsp){
   // erase ball
   dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Black);
 
@@ -347,6 +308,6 @@ void Clock::draw_breakout(){
   }
   dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
 
-  draw_time(Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, false);
+  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, false);
 }
 

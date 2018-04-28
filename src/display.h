@@ -1,6 +1,5 @@
 #pragma once 
 
-#include "config.h"
 #include "FastLED.h"
 
 #define NUM_LEDS 256
@@ -48,6 +47,7 @@ public:
 
   /* Animation stack methods */ 
   Animation* animation_pop();
+  bool animation_delete(Animation *anim);
   void animation_push(Animation *new_anim);
 
   /* ********************** */
@@ -75,7 +75,11 @@ private:
 class Animation{
   
 public:
-  virtual ~Animation();
+
+  Animation():next(NULL)
+  {}
+
+  virtual ~Animation(){}
   /**
    * Update animation (draw next frame on dsp)
    * returns: True if the animation has more frames, False if it is finished

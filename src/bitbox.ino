@@ -5,17 +5,13 @@
 #include <stdint.h>
 #include <WString.h>
 
-
-
-#include "config.h"
 #include "display.h"
 #include "utils.h"
 #include "clock.h"
 #include "heart.h"
 
 
-#define MIN_REPAINT 30
-#define CLOCK_UPDATE 125 // redraw clock  at most this often
+#define TARGET_MS_PER_FRAME 30
 
 
 /* ***************************************************************** */
@@ -25,10 +21,9 @@
 CommHandler *handler;
 
 Display dsp;
-Clock clk(&dsp);
+Clock clk;
 
 
-unsigned long last_clock_update=0;
 unsigned long last_repaint = 0;
 
 uint8_t heart_fr=0;
@@ -94,28 +89,19 @@ void loop() {
   }
   else if(Serial.available()==0)
   { //only if serial IO is not pending
-    unsigned long  t = millis();
     if(day()==28 && month()==4 && hour()>=8)
     {
       draw_heart();
     }
     else
-    {
-     
-      
-      if(t-last_clock_update>CLOCK_UPDATE){
-        clk.draw();
-        last_clock_update = t;
-      }   
+    { 
+      clk.update_clock_face(&dsp);
     } 
 
-    if(t-last_repaint>MIN_REPAINT){
+    if(millis()-last_repaint>TARGET_MS_PER_FRAME){
       dsp.flush_buffer();
-      last_repaint = t;
+      last_repaint = millis();
     }
-//    else{ // temporal dithering gives better colors but also ads a lot of flickering.
-//      FastLED.delay(15);
-//    }
   }
 
 }

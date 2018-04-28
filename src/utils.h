@@ -19,30 +19,6 @@ void update_time(byte *buf, int buf_len){
   setTime(t);
 }
 
-// FIXME Update to_string and from_string for the config over serial function.
-String to_string(uint8_t clock_mode, uint8_t brightness){
-  String res = String(clock_mode)   + " " +
-                String(brightness)   + " ";
-
-  return res;
-}
-
-bool from_string(String str){
-  unsigned int start=0, idx=0;
-  
-  idx = str.indexOf(' ', start); // clock_mode
-  if(idx<0) return false;
-  uint8_t clock_mode = str.substring(start, idx).toInt();
-  start = idx+1;
-
-  idx = str.indexOf(' ', start); // brightness
-  if(idx<0) return false;
-  uint8_t brightness = str.substring(start, idx).toInt();
-  start = idx+1;
-  
-  return true;
-}
-
 /* ***************************************************************** */
 /* ***********************  CommHandler **************************** */
 /* ***************************************************************** */
@@ -128,23 +104,15 @@ public:
   }
 
   void process_complete_packet(){
-    bool res;
     switch(packet_type){
       case PACKET_TYPE_IMAGE:
         dsp->repaint();
-        // cfg->last_image_received = millis();
         break;
       case PACKET_TYPE_CLOCK_SYNC:
         update_time(buf, pos);
         break;
       case PACKET_TYPE_SETTINGS:
-        // res = from_string(String((char*)buf));
-        // if(!res){
-        //   Serial.println("Failed to parse config");
-        // }
-        
-        // dsp->set_brightness(cfg->brightness);
-
+        Serial.println("XXXX Sorry:Config over serial not implemented.");
         break;
 
       default:
