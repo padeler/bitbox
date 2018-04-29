@@ -244,7 +244,7 @@ void Display::flush_buffer()
     bool finished = animation->update(this);
     if(finished){
       Animation *old = animation_pop();
-      delete old; // TODO document memory management properly
+      delete old; // TODO document Animation memory management properly
     }
   }
   if(repaint_needed){

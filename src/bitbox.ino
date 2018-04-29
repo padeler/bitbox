@@ -10,6 +10,8 @@
 #include "clock.h"
 #include "heart.h"
 
+#include "transitions.h"
+
 #include "message.h"
 
 #define TARGET_MS_PER_FRAME 30
@@ -63,6 +65,8 @@ void setup() {
 
   // initialize first clock face
   clk->update_clock_face(dsp);
+  // add a transition
+  // dsp->animation_push(new Melt());  
   // push a text message animation
   Message *msg = new Message("bitbox", 16,5,-1,0);
   dsp->animation_push(msg); 

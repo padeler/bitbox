@@ -1,6 +1,7 @@
 #pragma once
 
 #include "display.h"
+#include "transitions.h"
 
 #define NIGHT_BRIGHTNESS 5
 #define DAY_BRIGHTNESS 10
@@ -23,7 +24,7 @@
 #define DEFAULT_BG_CHANGE 300000 // millis
 #define DEFAULT_TIME 1514589221
 
-#define CLOCK_FACE_FRAMERATE 125 // redraw clock  at most this often
+#define CLOCKFACE_MS_PER_FRAME 125 // redraw clock  at most this often
 
 
 // Pong defines
@@ -70,7 +71,7 @@ public:
     // clear screen on first run
     if(last_repaint==0) dsp->fillrect(0,0,16,16, CRGB::Black);
 
-    if(millis()-last_repaint>CLOCK_FACE_FRAMERATE){
+    if(millis()-last_repaint>CLOCKFACE_MS_PER_FRAME){
       draw_clock_face(dsp);
       dsp->repaint(); 
       last_repaint = millis();
@@ -191,11 +192,16 @@ public:
 
     if(current_face==NULL || current_face->clock_mode!=clock_mode)
     { // remove old clock face and add a new one. 
+      // NOTE: no need to delete old clock face, the animation is deleted on pop.
       dsp->animation_delete(current_face); 
-      
       current_face = new ClockFace(clock_mode);
       dsp->animation_push(current_face);
-      // NOTE: no need to delete old clock face, the animation is deleted on pop.
+
+      if(random8(0,2)==0)
+        dsp->animation_push(new Collapse()); // transition
+      else
+        dsp->animation_push(new Melt()); // transition
+
     }
   }
   

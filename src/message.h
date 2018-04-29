@@ -5,7 +5,7 @@
 #include "display.h"
 #include "font.h"
 
-#define SCROLL_SPEED 200 
+#define SCROLL_SPEED 100 
 
 class Message: public Animation
 {
