@@ -11,9 +11,8 @@ Display::Display(){
   // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
   // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
-  // update settings using config
-  set_brightness(DEFAULT_BRIGHTNESS);
   
+  set_brightness(DEFAULT_BRIGHTNESS);
   // clear screen
   clear_display();
   repaint();
@@ -175,6 +174,8 @@ inline int Display::find_index(uint8_t row, uint8_t col){
 /* Animation stack methods */ 
 Animation* Display::animation_pop()
 {
+  // Serial.println("POP animation current size "+String(animation_stack_size()));
+
   Animation *res = animation;
   if(animation!=NULL){
     animation = animation->next;
@@ -184,6 +185,8 @@ Animation* Display::animation_pop()
 
 bool Display::animation_delete(Animation *anim)
 {
+  // Serial.println("Deleting animation current size "+String(animation_stack_size()));
+
   if(anim==NULL) return true;
 
   Animation *tmp = animation;
@@ -212,10 +215,24 @@ bool Display::animation_delete(Animation *anim)
   return false;
 }
 
+uint8_t Display::animation_stack_size()
+{
+  uint8_t s = 0;
+  Animation *anim = animation;
+  while(anim!=NULL && s<254)
+  {
+    s++;
+    anim = anim->next;
+  }
+  return s;
+}
+
 
 void Display::animation_push(Animation *new_anim){
   new_anim->next = animation;
   animation = new_anim; 
+  // Serial.println("pushed animation new size "+String(animation_stack_size()));
+        
 }
 
 /* ********************** */

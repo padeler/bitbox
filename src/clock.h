@@ -20,7 +20,7 @@
 
 #define DEFAULT_CLOCK_MODE CLOCK_MODE_RANDOM
 
-#define DEFAULT_BG_CHANGE 10000 // millis
+#define DEFAULT_BG_CHANGE 300000 // millis
 #define DEFAULT_TIME 1514589221
 
 #define CLOCK_FACE_FRAMERATE 125 // redraw clock  at most this often
@@ -162,16 +162,17 @@ class Clock
 public:
   Clock()
   {
-    last_bg_change = millis() - DEFAULT_BG_CHANGE;
+    last_bg_change = 0;
     current_face = NULL;
   }
 
   void update_clock_face(Display *dsp)
   {
-    if(millis() - last_bg_change<DEFAULT_BG_CHANGE) return; 
-    
     uint8_t clock_mode;
-    if (true)//hour() >= DAY_HOUR && hour() <= NIGHT_HOUR)
+
+    if(current_face!=NULL && millis() - last_bg_change<DEFAULT_BG_CHANGE) return; 
+    
+    if (hour() >= DAY_HOUR && hour() <= NIGHT_HOUR)
     {
       dsp->set_brightness(DAY_BRIGHTNESS);
 
@@ -187,7 +188,6 @@ public:
     }
 
     last_bg_change = millis();
-
 
     if(current_face==NULL || current_face->clock_mode!=clock_mode)
     { // remove old clock face and add a new one. 

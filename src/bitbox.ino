@@ -10,6 +10,7 @@
 #include "clock.h"
 #include "heart.h"
 
+#include "message.h"
 
 #define TARGET_MS_PER_FRAME 30
 
@@ -20,8 +21,8 @@
 
 CommHandler *handler;
 
-Display dsp;
-Clock clk;
+Display *dsp;
+Clock *clk;
 
 
 unsigned long last_repaint = 0;
@@ -33,13 +34,20 @@ unsigned long last_upd=0;
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
+  // Serial.begin(9600);
   Serial.setTimeout(1000);
   randomSeed(analogRead(0));
   
   // TODO load config from EEPROM
 
+  // initialize display
+  dsp = new Display();
+  
+  // initialize clock
+  clk = new Clock();
+
   // init communication handler
-  if(Serial) handler = new CommHandler(&dsp);
+  if(Serial) handler = new CommHandler(dsp);
   else handler = NULL;
   
   setSyncProvider(RTC.get);
@@ -52,6 +60,12 @@ void setup() {
   {
     Serial.println("RTC has set the system time");
   }
+
+  // initialize first clock face
+  clk->update_clock_face(dsp);
+  // push a text message animation
+  Message *msg = new Message("bitbox", 16,5,-1,0);
+  dsp->animation_push(msg); 
 }
 
 void serialEvent()
@@ -73,10 +87,10 @@ void draw_heart(){
   if(millis()-last_upd>100){
     uint8_t har[] = {0,1,1,2,2,2,2,1,1,0};
     last_upd = millis();
-    dsp.fillrect(0,0,16,16, CRGB::Black);
+    dsp->fillrect(0,0,16,16, CRGB::Black);
     int offset = (har[heart_fr%10])*(heart_width*heart_height*3);
-    dsp.drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
-    dsp.repaint();
+    dsp->drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
+    dsp->repaint();
     heart_fr+=1;
   }
 }
@@ -95,11 +109,11 @@ void loop() {
     }
     else
     { 
-      clk.update_clock_face(&dsp);
+      clk->update_clock_face(dsp);
     } 
 
     if(millis()-last_repaint>TARGET_MS_PER_FRAME){
-      dsp.flush_buffer();
+      dsp->flush_buffer();
       last_repaint = millis();
     }
   }

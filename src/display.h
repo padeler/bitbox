@@ -49,6 +49,7 @@ public:
   Animation* animation_pop();
   bool animation_delete(Animation *anim);
   void animation_push(Animation *new_anim);
+  uint8_t animation_stack_size();
 
   /* ********************** */
 
