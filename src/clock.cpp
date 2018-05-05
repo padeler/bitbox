@@ -34,7 +34,7 @@ void ClockFace::draw_time(Display *dsp, const Point &h_pos, const Point &m_pos, 
 }
 
 
-void ClockFace::update_pong_pad(int8_t idx, int8_t xpos){
+void MultiClockFace::update_pong_pad(int8_t idx, int8_t xpos){
   int8_t goal = MATRIX_HEIGHT/2; // move towards the mid of the screen
   if(abs(h_points[PB].x-h_points[idx].x)<MATRIX_WIDTH/2){ // move towards the ball
     goal = h_points[PB].y;
@@ -55,31 +55,25 @@ void ClockFace::update_pong_pad(int8_t idx, int8_t xpos){
   
 }
 
-void ClockFace::update_breakout_pad(int8_t idx, int8_t ypos){
+void Breakout::update_breakout_pad(){
   int8_t goal = MATRIX_WIDTH/2; // move towards the mid of the screen
-  if(abs(h_points[PB].y-h_points[idx].y)<MATRIX_HEIGHT/2){ // move towards the ball
-    goal = h_points[PB].x;
+  if(abs(ball.y-pad.y)<MATRIX_HEIGHT/2){ // move towards the ball
+    goal = ball.x;
   }
   
-  if(h_points[idx].x<goal){
-    h_points[idx].x = min(h_points[idx].x+1,MATRIX_WIDTH-2);
+  if(pad.x<goal){
+    pad.x = min(pad.x+abs(dx),MATRIX_WIDTH-2);
   }
-  else if(h_points[idx].x>goal){
-    h_points[idx].x = max(h_points[idx].x-1,1);
+  else if(pad.x>goal){
+    pad.x = max(pad.x-abs(dx),1);
   }
-  h_points[idx-1].x = h_points[idx].x-1;
-  h_points[idx+1].x = h_points[idx].x+1;
-
-  h_points[idx-1].y = ypos;
-  h_points[idx].y = ypos;
-  h_points[idx+1].y = ypos;
-  
+  pad.y = MATRIX_HEIGHT-1;
 }
 
 
 
 /* ************ MATRIX FACE ************** */
-void ClockFace::draw_matrix(Display *dsp){
+void MultiClockFace::draw_matrix(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 253);
   for(int i=0;i<CLOCK_NUM_POINTS;++i){
       h_points[i].y = (h_points[i].y+1);
@@ -94,7 +88,7 @@ void ClockFace::draw_matrix(Display *dsp){
 }
 
 /* ************ MARIOFACE ************** */
-void ClockFace::draw_mario(Display *dsp){
+void MultiClockFace::draw_mario(Display *dsp){
   dsp->fillrect(0,0,16,16, CRGB::Black);
   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
@@ -113,7 +107,7 @@ void ClockFace::draw_mario(Display *dsp){
 }
 
 /* ************ FIRE FACE ************** */
-void ClockFace::draw_fire(Display *dsp){
+void MultiClockFace::draw_fire(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 200);
   int offset = (motion%fire_frames)*(fire_width*fire_height*3);
 
@@ -127,26 +121,39 @@ void ClockFace::draw_fire(Display *dsp){
 }
 
 /* ************ STARFIELD FACE ************** */
-void ClockFace::draw_starfield(Display *dsp){
+bool Starfield::update_clock_face(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
-  for(int i=0;i<CLOCK_NUM_POINTS;++i){
-      h_points[i].x = (h_points[i].x-1);
-      dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
+  for(int i=0;i<NUM_STARS;++i){
+    if(vertical) h_points[i].y = (h_points[i].y-1);
+    else h_points[i].x = (h_points[i].x-1);
 
-      if(h_points[i].x<0){
-        h_points[i].x = random(CLOCK_NUM_POINTS*10);
-        h_points[i].y = random(CLOCK_NUM_POINTS*10) % MATRIX_HEIGHT;
+    dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
+
+    if(vertical){
+      if(h_points[i].y<0){
+        h_points[i].x = random(NUM_STARS*10) % MATRIX_WIDTH;
+        h_points[i].y = random(NUM_STARS*10);
       }
+    }
+    else{
+      if(h_points[i].x<0){
+        h_points[i].x = random(NUM_STARS*10);
+        h_points[i].y = random(NUM_STARS*10) % MATRIX_HEIGHT;
+      }
+    }
   }
   colorIndex += delta_color;
   if(colorIndex==0) delta_color = -delta_color;
 
   draw_time(dsp, Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, false, true);
+  
+  return false; //never completes.
+
 }
 
 /* ************ SNAKE FACE ************** */
-void ClockFace::draw_snake(Display *dsp){
+void MultiClockFace::draw_snake(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   Point *p = &h_points[snake_head];
@@ -201,7 +208,7 @@ void ClockFace::draw_snake(Display *dsp){
 }
 
 /* ************ PONG FACE ************** */
-void ClockFace::draw_pong(Display *dsp){
+void MultiClockFace::draw_pong(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   // left pad indices 0,1,2
@@ -241,73 +248,80 @@ void ClockFace::draw_pong(Display *dsp){
 /* ************ BREAKOUT FACE ************** */
 
 bool break_block(CRGB &bl){
-    if((bl[0]|bl[1]|bl[2])!=0){ // there is a block
-        bl.nscale8_video(180); // change color (make dimmer)
-        return true;
-    }
-    return false;
+  int v = (int)bl[0]+(int)bl[1]+int(bl[2]);
+  if(v>0){ // there is a block with above min color.
+    if(v>100) bl.nscale8(200); // change color (make dimmer)
+    return true;
+  }
+  return false;
 }
     
+float update_speed(int dx, int base)
+{
+  if(random(10)%3==0) base = 2*base;
+  return -dx/abs(dx) * base;
+}
 
-void ClockFace::draw_breakout(Display *dsp){
+bool Breakout::update_clock_face(Display *dsp){
   // erase ball
-  dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Black);
+  dsp->set(ball.x, ball.y, CRGB::Black);
 
-  // pad indices 0,1,2
-  // ball pad 6
-
-  Point *b = &h_points[PB];
+  Point *b = &ball;
   if(b->y<=8) // check for block collistions
   {
     CRGB tx = dsp->get(b->x+dx, b->y);
     CRGB ty = dsp->get(b->x, b->y+dy);    
     CRGB t = dsp->get(b->x+dx, b->y+dy);    
-
+    
+    bool flipx = false;
+    bool flipy = false;
     if(break_block(ty)){
       dsp->set(b->x, b->y+dy, ty);
-      dy = -dy;
+      flipy = true;
     }
-    else if(break_block(tx)){
+    if(break_block(tx)){
       dsp->set(b->x+dx, b->y, tx);
-      dx = -dx;
+      flipx = true;
     }
-    else if(break_block(t)){
+    if(break_block(t)){
       dsp->set(b->x+dx, b->y+dy, t);
-      dy = -dy;
-      dx = -dx;
+      flipx = flipy = true;
     }
 
+    if(flipx) dx = -dx;
+    if(flipy) dy = -dy;
   }
+
   
   // check that ball is in bounds
-  if(h_points[PB].y+dy==-1){
+  if(ball.y+dy<0){
     dy = -dy;
   }
 
-  if(h_points[PB].y+dy==MATRIX_HEIGHT-1){
+  if(ball.y+dy>MATRIX_HEIGHT-2){
     if(random(3)==1) {
-        dx = -dx;
+      dx = update_speed(dx, 1);
     }
     dy = -dy;
   }
 
-  if(h_points[PB].x + dx==-1 || h_points[PB].x + dx==MATRIX_WIDTH)
+  if(ball.x + dx<0 || ball.x + dx>MATRIX_WIDTH-1)
   {
     dx = -dx;
   }
   
-  h_points[PB].x += dx;
-  h_points[PB].y += dy;
+  ball.x += dx;
+  ball.y += dy;
 
-  update_breakout_pad(PL, MATRIX_HEIGHT-1);
+  update_breakout_pad();
 
   // draw everything
   dsp->fillrect(0,MATRIX_HEIGHT-1,MATRIX_WIDTH,1, CRGB::Black);
-  for(int8_t i=-1; i<2; i++){
-     dsp->set(h_points[PL+i].x, h_points[PL+i].y, CRGB::Purple);
-  }
-  dsp->set(h_points[PB].x, h_points[PB].y, CRGB::Snow);
+  dsp->fillrect(pad.x-1,pad.y,3,1, CRGB::Purple);
+  dsp->set(ball.x, ball.y, CRGB::Snow);
 
   draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, false);
+
+  return false;
 }
 

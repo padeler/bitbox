@@ -21,8 +21,7 @@
 
 #define DEFAULT_CLOCK_MODE CLOCK_MODE_RANDOM
 
-#define DEFAULT_BG_CHANGE 300000 // millis
-#define DEFAULT_TIME 1514589221
+#define DEFAULT_BG_CHANGE 180000 // millis
 
 #define CLOCKFACE_MS_PER_FRAME 125 // redraw clock  at most this often
 
@@ -41,14 +40,94 @@ struct Point
   int8_t x, y;
 };
 
-class ClockFace : public Animation
+
+class ClockFace: public Animation
 {
 public:
-  ClockFace(uint8_t mode)
+
+  ClockFace(uint8_t mode): clock_mode(mode)
   {
-    clock_mode = mode;
     hh = -1;
     mm = -1;
+    last_repaint = 0;
+  }
+
+  void draw_time(Display *dsp, const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
+  
+  virtual ~ClockFace() throw() {}
+  virtual bool update_clock_face(Display *dsp);
+
+  bool update(Display *dsp)
+  {
+    // clear screen on first run
+    if(last_repaint==0) dsp->fillrect(0,0,16,16, CRGB::Black);
+
+    if(millis()-last_repaint>CLOCKFACE_MS_PER_FRAME){
+      update_clock_face(dsp);
+      dsp->repaint();
+      last_repaint = millis();
+    }
+    return false; // ClockFace animations never end (its a clock)
+  }
+
+  
+  uint8_t clock_mode;
+  int hh, mm;
+  unsigned long last_repaint;
+};
+
+class Starfield: public ClockFace
+{
+public:
+  #define NUM_STARS 10
+  Starfield(): ClockFace(CLOCK_MODE_STARFIELD)
+  {
+    colorIndex = 0;
+    delta_color = 1;
+    vertical = random(10)%2==0;
+
+    for (int8_t i = 0; i < NUM_STARS; i++)
+    {
+      h_points[i].x = MATRIX_WIDTH / 2;
+      h_points[i].y = MATRIX_HEIGHT / 2;
+    }
+  }
+  
+  bool update_clock_face(Display *dsp);
+
+  int8_t delta_color;
+  uint8_t colorIndex;
+  bool vertical;
+
+
+  Point h_points[NUM_STARS];
+};
+
+class Breakout: public ClockFace
+{
+public:
+  Breakout(): ClockFace(CLOCK_MODE_BREAKOUT)
+  {
+    dx = dy = 1;
+    ball.x=MATRIX_WIDTH/2;
+    ball.y=MATRIX_HEIGHT-3;
+    pad.x = MATRIX_WIDTH/2;
+    pad.y = MATRIX_HEIGHT-1;
+  }
+
+  void update_breakout_pad();
+  bool update_clock_face(Display *dsp);
+
+  int8_t dx,dy;
+  Point pad, ball;
+};
+
+class MultiClockFace : public ClockFace
+{
+public:
+  MultiClockFace(uint8_t mode): ClockFace(mode)
+  {
+
     snake_head = 0;
     colorIndex = 0;
     delta_color = 1;
@@ -64,37 +143,17 @@ public:
     }
   }
 
-  ~ClockFace() throw(){}
-
-  bool update(Display *dsp)
-  {
-    // clear screen on first run
-    if(last_repaint==0) dsp->fillrect(0,0,16,16, CRGB::Black);
-
-    if(millis()-last_repaint>CLOCKFACE_MS_PER_FRAME){
-      draw_clock_face(dsp);
-      dsp->repaint(); 
-      last_repaint = millis();
-    }
-    return false; // ClockFace animations never end (its a clock)
-  }
 
 
-  void draw_clock_face(Display *dsp)
+  bool update_clock_face(Display *dsp)
   {
     switch (clock_mode & 0x0F)
     {
-    case CLOCK_MODE_STARFIELD:
-      draw_starfield(dsp);
-      break;
     case CLOCK_MODE_SNAKE:
       draw_snake(dsp);
       break;
     case CLOCK_MODE_PONG:
       draw_pong(dsp);
-      break;
-    case CLOCK_MODE_BREAKOUT:
-      draw_breakout(dsp);
       break;
     case CLOCK_MODE_MARIO:
       draw_mario(dsp);
@@ -109,9 +168,9 @@ public:
       draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, false);
       break;
     }
+    return false;
   }
 
-  void draw_time(Display *dsp, const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
 
   void draw_matrix(Display *dsp);
   void draw_mario(Display *dsp);
@@ -119,9 +178,7 @@ public:
   void draw_starfield(Display *dsp);
   void draw_snake(Display *dsp);
   void draw_pong(Display *dsp);
-  void draw_breakout(Display *dsp);
   void update_pong_pad(int8_t idx, int8_t xpos);
-  void update_breakout_pad(int8_t idx, int8_t ypos);
 
   void clear_points(Display *dsp)
   {
@@ -139,13 +196,11 @@ public:
     }
   }
 
-  int hh, mm;
   int8_t delta_color;
   int8_t dx, dy;
   int8_t motion;
-  uint8_t clock_mode;
   uint8_t colorIndex;
-  unsigned long last_repaint, anim_frame;
+  unsigned long anim_frame;
 
   uint8_t snake_head;
   Point h_points[CLOCK_NUM_POINTS];
@@ -169,11 +224,14 @@ public:
 
   void update_clock_face(Display *dsp)
   {
-    uint8_t clock_mode;
 
     if(current_face!=NULL && millis() - last_bg_change<DEFAULT_BG_CHANGE) return; 
     
-    if (hour() >= DAY_HOUR && hour() <= NIGHT_HOUR)
+    uint8_t clock_mode;
+    if(current_face!=NULL) clock_mode = current_face->clock_mode;
+    else clock_mode = DEFAULT_CLOCK_MODE & 0xFF;
+    
+    if(hour() >= DAY_HOUR && hour() <= NIGHT_HOUR)
     {
       dsp->set_brightness(DAY_BRIGHTNESS);
 
@@ -194,7 +252,7 @@ public:
     { // remove old clock face and add a new one. 
       // NOTE: no need to delete old clock face, the animation is deleted on pop.
       dsp->animation_delete(current_face); 
-      current_face = new ClockFace(clock_mode);
+      current_face = create_face_animation(clock_mode);
       dsp->animation_push(current_face);
 
       if(random8(0,2)==0)
@@ -202,6 +260,19 @@ public:
       else
         dsp->animation_push(new Melt()); // transition
 
+    }
+  }
+
+  ClockFace *create_face_animation(uint8_t clock_mode)
+  {
+    switch (clock_mode & 0x0F)
+    {
+      case CLOCK_MODE_BREAKOUT:
+        return new Breakout();
+      case CLOCK_MODE_STARFIELD:
+        return new Starfield();
+      default: // multi face clock anim  
+        return new MultiClockFace(clock_mode);
     }
   }
   

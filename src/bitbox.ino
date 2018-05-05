@@ -8,13 +8,14 @@
 #include "display.h"
 #include "utils.h"
 #include "clock.h"
-#include "heart.h"
+// #include "heart.h"
 
 #include "transitions.h"
 
 #include "message.h"
 
 #define TARGET_MS_PER_FRAME 30
+#define DEFAULT_TIME 1514589221
 
 
 /* ***************************************************************** */
@@ -29,7 +30,7 @@ Clock *clk;
 
 unsigned long last_repaint = 0;
 
-uint8_t heart_fr=0;
+// uint8_t heart_fr=0;
 
 unsigned long last_upd=0;
 
@@ -86,18 +87,18 @@ void serialEvent()
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-void draw_heart(){
+// void draw_heart(){
 
-  if(millis()-last_upd>100){
-    uint8_t har[] = {0,1,1,2,2,2,2,1,1,0};
-    last_upd = millis();
-    dsp->fillrect(0,0,16,16, CRGB::Black);
-    int offset = (har[heart_fr%10])*(heart_width*heart_height*3);
-    dsp->drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
-    dsp->repaint();
-    heart_fr+=1;
-  }
-}
+//   if(millis()-last_upd>100){
+//     uint8_t har[] = {0,1,1,2,2,2,2,1,1,0};
+//     last_upd = millis();
+//     dsp->fillrect(0,0,16,16, CRGB::Black);
+//     int offset = (har[heart_fr%10])*(heart_width*heart_height*3);
+//     dsp->drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
+//     dsp->repaint();
+//     heart_fr+=1;
+//   }
+// }
 
 
 void loop() {
@@ -107,11 +108,11 @@ void loop() {
   }
   else if(Serial.available()==0)
   { //only if serial IO is not pending
-    if(day()==28 && month()==4 && hour()>=8)
-    {
-      draw_heart();
-    }
-    else
+    // if(day()==28 && month()==4 && hour()>=8)
+    // {
+    //   draw_heart();
+    // }
+    // else
     { 
       clk->update_clock_face(dsp);
     } 
