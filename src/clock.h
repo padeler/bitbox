@@ -84,7 +84,7 @@ public:
   {
     colorIndex = 0;
     delta_color = 1;
-    vertical = random(10)%2==0;
+    vertical = false;
 
     for (int8_t i = 0; i < NUM_STARS; i++)
     {

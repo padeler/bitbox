@@ -125,15 +125,15 @@ bool Starfield::update_clock_face(Display *dsp){
   dsp->fadetoblack(0,0,16,16, 128);
 
   for(int i=0;i<NUM_STARS;++i){
-    if(vertical) h_points[i].y = (h_points[i].y-1);
+    if(vertical) h_points[i].y = (h_points[i].y+1);
     else h_points[i].x = (h_points[i].x-1);
 
     dsp->set(h_points[i].x, h_points[i].y, ColorFromPalette(HeatColors_p, colorIndex));
 
     if(vertical){
-      if(h_points[i].y<0){
+      if(h_points[i].y>MATRIX_HEIGHT){
         h_points[i].x = random(NUM_STARS*10) % MATRIX_WIDTH;
-        h_points[i].y = random(NUM_STARS*10);
+        h_points[i].y = - random(NUM_STARS);
       }
     }
     else{
@@ -144,7 +144,10 @@ bool Starfield::update_clock_face(Display *dsp){
     }
   }
   colorIndex += delta_color;
-  if(colorIndex==0) delta_color = -delta_color;
+  if(colorIndex==0){
+    delta_color = -delta_color;
+    if(random(2)==0) vertical=!vertical;
+  }
 
   draw_time(dsp, Point(2, 0), Point(4, 7), CRGB::Yellow, CRGB::SteelBlue, false, false, false, true);
   

@@ -6,10 +6,10 @@
  * Automatically generated from font file: /usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf
  */
 
-const uint8_t char_height = 10;
-const uint8_t char_width = 5;
-const uint8_t ascii_first = 32;
-const uint8_t charset_size = 95;
+#define char_height 10
+#define char_width 5
+#define ascii_first 32
+#define charset_size 95
 
 const byte charset[] PROGMEM = { 
 	0x0, // Char " "

@@ -60,11 +60,18 @@ public:
     repaint_needed = true;
   }
 
+  inline bool is_animations_enabled(){
+    return animations_enabled;
+  }
 
+  inline void set_animations_enabled(bool v){
+    animations_enabled = v;
+  }
   
 private:
   
   bool repaint_needed;
+  bool animations_enabled;
   
   // Define the array of leds
   CRGB leds[NUM_LEDS];

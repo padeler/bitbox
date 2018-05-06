@@ -57,11 +57,11 @@ void setup() {
   if(timeStatus() != timeSet)
   {
     setTime(DEFAULT_TIME);
-    Serial.println("Unable to sync with the RTC");
+    Serial.println(F("Unable to sync with the RTC"));
   }
   else
   {
-    Serial.println("RTC has set the system time");
+    Serial.println(F("RTC has set the system time"));
   }
 
   // initialize first clock face
@@ -69,7 +69,7 @@ void setup() {
   // add a transition
   // dsp->animation_push(new Melt());  
   // push a text message animation
-  Message *msg = new Message("bitbox", 16,5,-1,0);
+  Message *msg = new Message(F("bitbox"), 16,5,-1,0);
   dsp->animation_push(msg); 
 }
 

@@ -42,7 +42,7 @@ public:
         rcv_start = millis();
       }
       else{
-        Serial.println("Invalid packet type");
+        Serial.println(F("Invalid packet type"));
       }
       return;
     }
@@ -50,7 +50,7 @@ public:
     if(parts==0){
       parts = val;
       if(val==0) {
-        Serial.println("Invalid parts number 0.");
+        Serial.println(F("Invalid parts number 0."));
         reset();
       }
       return;
@@ -88,7 +88,7 @@ public:
     {
 //      String msg = String(packet_type)+" " + String(pos) +"/" + String(parts) + "/" + String(offset)+" Start time: "+ String(rcv_start); 
       reset();
-      Serial.println("Receive timeout");
+      Serial.println(F("Receive timeout"));
     }
   }
 
@@ -112,7 +112,7 @@ public:
         update_time(buf, pos);
         break;
       case PACKET_TYPE_SETTINGS:
-        Serial.println("XXXX Sorry:Config over serial not implemented.");
+        Serial.println(F("XXXX Sorry:Config over serial not implemented."));
         break;
 
       default:
