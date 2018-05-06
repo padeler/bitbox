@@ -53,9 +53,9 @@ public:
 
         if(millis()-last_repaint>TR_MS_PER_FRAME)
         {
-            for(int p=0;p<MATRIX_WIDTH*MATRIX_HEIGHT;++p)
+            for(int p=MATRIX_WIDTH*MATRIX_HEIGHT-1;p>=0;--p)
             {
-                CRGB c = dsp->get(p%MATRIX_WIDTH,p/MATRIX_WIDTH);
+                CRGB c = dsp->get(p%MATRIX_WIDTH, p/MATRIX_WIDTH);
                 if((c[0]|c[1]|c[2])!=0)// there is color in this pixel
                 {
                     int ny = p/MATRIX_WIDTH + 1;
