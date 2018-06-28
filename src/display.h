@@ -11,6 +11,7 @@
 #define MAX_BRIGHTNESS 30 
 #define DEFAULT_BRIGHTNESS 10
 
+#define IS_ON(c) ((c[0]|c[1]|c[2])!=0)
 class Animation;
 
 class Display{

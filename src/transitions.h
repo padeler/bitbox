@@ -56,15 +56,21 @@ public:
             for(int p=MATRIX_WIDTH*MATRIX_HEIGHT-1;p>=0;--p)
             {
                 CRGB c = dsp->get(p%MATRIX_WIDTH, p/MATRIX_WIDTH);
-                if((c[0]|c[1]|c[2])!=0)// there is color in this pixel
+                if(IS_ON(c))// there is color in this pixel
                 {
                     int ny = p/MATRIX_WIDTH + 1;
-                    int nx = p%MATRIX_WIDTH -1 + random8(0,3);
+                    int nx = p%MATRIX_WIDTH;
+                    if(nx<8) nx-= random(-1,3);
+                    else nx+= random(-1,3);
                     
-                    if(frame_no<20) ny = min(ny,15);
+                    if(frame_no<20){ 
+                        ny = min(ny,15);
+                        nx = max(0,nx);
+                        nx = min(nx,15);
+                    }
 
                     CRGB nc = dsp->get(nx,ny);
-                    if((nc[0]|nc[1]|nc[2])==0)
+                    if(!IS_ON(nc))
                     {
                         dsp->set(p%MATRIX_WIDTH,p/MATRIX_WIDTH,CRGB::Black);
                         dsp->set(nx,ny,c);

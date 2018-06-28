@@ -13,6 +13,7 @@ public:
     Message(const String &txt, int x, int y, int8_t dx, int8_t dy):dx(dx),dy(dy),x(x),y(y),txt(txt)
     {
         fg_color = CRGB::White;
+        compact = false;
         last_repaint = 0;
     }
 
@@ -24,7 +25,7 @@ public:
             
             x+=dx;y+=dy;
 
-            dsp->draw_string(txt, x, y, fg_color, false, false);
+            dsp->draw_string(txt, x, y, fg_color, compact, false);
             dsp->repaint();
 
             last_repaint = millis();
@@ -33,7 +34,7 @@ public:
                (dx>0 && x> MATRIX_WIDTH) || 
                (dy<0 && y<-char_height) ||
                (dy>0 && y> MATRIX_HEIGHT))
-            { // text scrolled completelly of the screen. Animation done.
+            { // text scrolled completelly off screen. Animation done.
                 return true;
             }
         }
@@ -42,6 +43,7 @@ public:
 
 private:
     unsigned long last_repaint;
+    bool compact;
     int8_t dx, dy;
     int x,y;
     CRGB fg_color;

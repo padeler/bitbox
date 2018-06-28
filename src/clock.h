@@ -13,10 +13,10 @@
 #define CLOCK_MODE_SNAKE 1
 #define CLOCK_MODE_PONG 2
 #define CLOCK_MODE_BREAKOUT 3
-#define CLOCK_MODE_MARIO 4
-#define CLOCK_MODE_MATRIX 5
-#define CLOCK_MODE_FIRE 6
-#define CLOCK_MODE_PLAIN 7 // also max
+#define CLOCK_MODE_MATRIX 4
+#define CLOCK_MODE_FIRE 5
+#define CLOCK_MODE_PLAIN 6 // also max
+// #define CLOCK_MODE_MARIO 7
 #define CLOCK_MODE_RANDOM 128
 
 #define DEFAULT_CLOCK_MODE CLOCK_MODE_RANDOM
@@ -155,9 +155,9 @@ public:
     case CLOCK_MODE_PONG:
       draw_pong(dsp);
       break;
-    case CLOCK_MODE_MARIO:
-      draw_mario(dsp);
-      break;
+    // case CLOCK_MODE_MARIO:
+    //   draw_mario(dsp);
+    //   break;
     case CLOCK_MODE_MATRIX:
       draw_matrix(dsp);
       break;
@@ -165,7 +165,7 @@ public:
       draw_fire(dsp);
       break;
     default: // CLOCK_MODE_PLAIN
-      draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, false);
+      draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, true);
       break;
     }
     return false;
@@ -173,7 +173,7 @@ public:
 
 
   void draw_matrix(Display *dsp);
-  void draw_mario(Display *dsp);
+  // void draw_mario(Display *dsp);
   void draw_fire(Display *dsp);
   void draw_starfield(Display *dsp);
   void draw_snake(Display *dsp);

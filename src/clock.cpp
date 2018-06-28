@@ -2,7 +2,7 @@
 
 #include "clock.h"
 #include "fire.h"
-#include "mario.h"
+// #include "mario.h"
 
 inline String format_digit(int d){
   String s(d);
@@ -88,23 +88,23 @@ void MultiClockFace::draw_matrix(Display *dsp){
 }
 
 /* ************ MARIOFACE ************** */
-void MultiClockFace::draw_mario(Display *dsp){
-  dsp->fillrect(0,0,16,16, CRGB::Black);
-  int offset = (motion%mario_frames)*(mario_width*mario_height*3);
+// void MultiClockFace::draw_mario(Display *dsp){
+//   dsp->fillrect(0,0,16,16, CRGB::Black);
+//   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
-  dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
-  draw_time(dsp, Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
+//   dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
+//   draw_time(dsp, Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
 
-  if(millis()-anim_frame>250){
+//   if(millis()-anim_frame>250){
     
-    if(motion+dx>=mario_frames || motion+dx<0){
-      dx = -dx;
-    }
+//     if(motion+dx>=mario_frames || motion+dx<0){
+//       dx = -dx;
+//     }
     
-    motion += dx;
-    anim_frame = millis();
-  }
-}
+//     motion += dx;
+//     anim_frame = millis();
+//   }
+// }
 
 /* ************ FIRE FACE ************** */
 void MultiClockFace::draw_fire(Display *dsp){

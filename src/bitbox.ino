@@ -14,6 +14,12 @@
 
 #include "message.h"
 
+#include "Adafruit_Sensor.h"
+#include "DHT.h"
+
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+#define DHTPIN 7
+
 #define TARGET_MS_PER_FRAME 30
 #define DEFAULT_TIME 1514589221
 
@@ -34,6 +40,8 @@ unsigned long last_repaint = 0;
 
 unsigned long last_upd=0;
 
+DHT dht(DHTPIN, DHTTYPE);
+
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
@@ -42,6 +50,9 @@ void setup() {
   randomSeed(analogRead(0));
   
   // TODO load config from EEPROM
+  
+  // Initialize thermometer/humidity lib
+  dht.begin();
 
   // initialize display
   dsp = new Display();
@@ -101,6 +112,27 @@ void serialEvent()
 // }
 
 
+float hum,temp;
+
+void update_temp(){
+
+  if(millis()-last_upd>30000){
+    hum = dht.readHumidity();
+    temp = dht.readTemperature();
+
+    // Check if any reads failed and exit early (to try again).
+    if (isnan(hum) || isnan(temp)) {
+      Serial.println(F("Failed to read from DHT sensor!"));
+      return;
+    }
+
+    last_upd = millis();
+    dsp->animation_push(new Message(String(hum,1)+"H", 16,8,-1,0)); 
+    dsp->animation_push(new Message(String(temp,1)+"C", 16,0,-1,0)); 
+    dsp->animation_push(new Collapse()); 
+  }
+}
+
 void loop() {
   
   if(handler && handler->isReceiving()){
@@ -112,6 +144,10 @@ void loop() {
     // {
     //   draw_heart();
     // }
+    // if(true)
+    {
+      update_temp();
+    }
     // else
     { 
       clk->update_clock_face(dsp);
