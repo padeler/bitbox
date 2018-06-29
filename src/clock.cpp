@@ -73,7 +73,7 @@ void Breakout::update_breakout_pad(){
 
 
 /* ************ MATRIX FACE ************** */
-void MultiClockFace::draw_matrix(Display *dsp){
+void MultiClockFace::draw_matrix(Display *dsp, bool force_redraw){
   dsp->fadetoblack(0,0,16,16, 253);
   for(int i=0;i<CLOCK_NUM_POINTS;++i){
       h_points[i].y = (h_points[i].y+1);
@@ -88,7 +88,7 @@ void MultiClockFace::draw_matrix(Display *dsp){
 }
 
 /* ************ MARIOFACE ************** */
-// void MultiClockFace::draw_mario(Display *dsp){
+// void MultiClockFace::draw_mario(Display *dsp, bool force_redraw){
 //   dsp->fillrect(0,0,16,16, CRGB::Black);
 //   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
@@ -107,7 +107,7 @@ void MultiClockFace::draw_matrix(Display *dsp){
 // }
 
 /* ************ FIRE FACE ************** */
-void MultiClockFace::draw_fire(Display *dsp){
+void MultiClockFace::draw_fire(Display *dsp, bool force_redraw){
   dsp->fadetoblack(0,0,16,16, 200);
   int offset = (motion%fire_frames)*(fire_width*fire_height*3);
 
@@ -121,7 +121,7 @@ void MultiClockFace::draw_fire(Display *dsp){
 }
 
 /* ************ STARFIELD FACE ************** */
-bool Starfield::update_clock_face(Display *dsp){
+bool Starfield::update_clock_face(Display *dsp, bool force_redraw){
   dsp->fadetoblack(0,0,16,16, 128);
 
   for(int i=0;i<NUM_STARS;++i){
@@ -156,7 +156,7 @@ bool Starfield::update_clock_face(Display *dsp){
 }
 
 /* ************ SNAKE FACE ************** */
-void MultiClockFace::draw_snake(Display *dsp){
+void MultiClockFace::draw_snake(Display *dsp, bool force_redraw){
   dsp->fadetoblack(0,0,16,16, 128);
 
   Point *p = &h_points[snake_head];
@@ -211,7 +211,7 @@ void MultiClockFace::draw_snake(Display *dsp){
 }
 
 /* ************ PONG FACE ************** */
-void MultiClockFace::draw_pong(Display *dsp){
+void MultiClockFace::draw_pong(Display *dsp, bool force_redraw){
   dsp->fadetoblack(0,0,16,16, 128);
 
   // left pad indices 0,1,2
@@ -265,7 +265,7 @@ float update_speed(int dx, int base)
   return -dx/abs(dx) * base;
 }
 
-bool Breakout::update_clock_face(Display *dsp){
+bool Breakout::update_clock_face(Display *dsp, bool force_redraw){
   // erase ball
   dsp->set(ball.x, ball.y, CRGB::Black);
 
@@ -323,7 +323,7 @@ bool Breakout::update_clock_face(Display *dsp){
   dsp->fillrect(pad.x-1,pad.y,3,1, CRGB::Purple);
   dsp->set(ball.x, ball.y, CRGB::Snow);
 
-  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, false);
+  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, force_redraw);
 
   return false;
 }

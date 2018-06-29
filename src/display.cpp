@@ -6,12 +6,12 @@ Display::Display(){
 
   animation = NULL;
   animations_enabled = true;
+  force_redraw = true;
   // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
   // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
   // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
-  
   set_brightness(DEFAULT_BRIGHTNESS);
   // clear screen
   clear_display();
@@ -179,6 +179,7 @@ Animation* Display::animation_pop()
   Animation *res = animation;
   if(animation!=NULL){
     animation = animation->next;
+    force_redraw = true;
   }
   return res;
 }
@@ -204,6 +205,7 @@ bool Display::animation_delete(Animation *anim)
         animation = animation->next;
       }
       delete anim;
+      force_redraw=true;
       return true;
     }
     else
@@ -231,6 +233,7 @@ uint8_t Display::animation_stack_size()
 void Display::animation_push(Animation *new_anim){
   new_anim->next = animation;
   animation = new_anim; 
+  force_redraw = true;
   // Serial.println("pushed animation new size "+String(animation_stack_size()));
         
 }
@@ -241,10 +244,12 @@ void Display::flush_buffer()
 {
   if(animation!=NULL)
   {
-    bool finished = animation->update(this);
+    bool finished = animation->update(this, force_redraw);
+    force_redraw = false;
     if(finished){
       Animation *old = animation_pop();
       delete old; // TODO document Animation memory management properly
+      force_redraw = true;
     }
   }
   if(repaint_needed){

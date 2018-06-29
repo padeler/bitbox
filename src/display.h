@@ -73,6 +73,7 @@ private:
   
   bool repaint_needed;
   bool animations_enabled;
+  bool force_redraw;
   
   // Define the array of leds
   CRGB leds[NUM_LEDS];
@@ -93,7 +94,7 @@ public:
    * Update animation (draw next frame on dsp)
    * returns: True if the animation has more frames, False if it is finished
    */
-  virtual bool update(Display *dsp);
+  virtual bool update(Display *dsp, bool force_repaint);
 
   Animation *next;
 };

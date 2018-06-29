@@ -80,7 +80,7 @@ void setup() {
   // add a transition
   // dsp->animation_push(new Melt());  
   // push a text message animation
-  Message *msg = new Message(F("bitbox"), 16,5,-1,0);
+  Message *msg = new Message(F("bitbox"), 16,5,-1,0,false);
   dsp->animation_push(msg); 
 }
 
@@ -112,13 +112,15 @@ void serialEvent()
 // }
 
 
-float hum,temp;
+uint8_t hum;
+float temp;
 
 void update_temp(){
 
-  if(millis()-last_upd>30000){
-    hum = dht.readHumidity();
+  if(millis()-last_upd>50000){
+    hum = round(dht.readHumidity());
     temp = dht.readTemperature();
+    last_upd = millis();
 
     // Check if any reads failed and exit early (to try again).
     if (isnan(hum) || isnan(temp)) {
@@ -126,9 +128,8 @@ void update_temp(){
       return;
     }
 
-    last_upd = millis();
-    dsp->animation_push(new Message(String(hum,1)+"H", 16,8,-1,0)); 
-    dsp->animation_push(new Message(String(temp,1)+"C", 16,0,-1,0)); 
+    dsp->animation_push(new Message(String(hum)+" %", 0,-8,0,1, true)); 
+    dsp->animation_push(new Message(String(temp,1), 0,-8,0,1, true)); 
     dsp->animation_push(new Collapse()); 
   }
 }

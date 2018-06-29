@@ -11,9 +11,9 @@ public:
         last_repaint = 0;
         frame_no = 0;
     }
-    bool update(Display *dsp)
+    bool update(Display *dsp, bool force_repaint)
     {
-        if(millis()-last_repaint>TR_MS_PER_FRAME)
+        if(millis()-last_repaint>TR_MS_PER_FRAME || force_repaint)
         {
             for(int8_t y=MATRIX_HEIGHT-2;y>=0;y--)
             {
@@ -48,10 +48,10 @@ public:
         last_repaint = 0;
         frame_no = 0;
     }
-    bool update(Display *dsp)
+    bool update(Display *dsp, bool force_repaint)
     {
 
-        if(millis()-last_repaint>TR_MS_PER_FRAME)
+        if(millis()-last_repaint>TR_MS_PER_FRAME || force_repaint)
         {
             for(int p=MATRIX_WIDTH*MATRIX_HEIGHT-1;p>=0;--p)
             {
@@ -60,13 +60,10 @@ public:
                 {
                     int ny = p/MATRIX_WIDTH + 1;
                     int nx = p%MATRIX_WIDTH;
-                    if(nx<8) nx-= random(-1,3);
-                    else nx+= random(-1,3);
+                    nx += random(-1,2);
                     
-                    if(frame_no<20){ 
+                    if(frame_no<15){ 
                         ny = min(ny,15);
-                        nx = max(0,nx);
-                        nx = min(nx,15);
                     }
 
                     CRGB nc = dsp->get(nx,ny);

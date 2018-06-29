@@ -55,15 +55,15 @@ public:
   void draw_time(Display *dsp, const Point &h_pos, const Point &m_pos, const CRGB &h_color, const CRGB &m_color, bool clear_before_draw, bool compact, bool overlay, bool force_redraw);
   
   virtual ~ClockFace() throw() {}
-  virtual bool update_clock_face(Display *dsp);
+  virtual bool update_clock_face(Display *dsp, bool force_redraw);
 
-  bool update(Display *dsp)
+  bool update(Display *dsp, bool force_redraw)
   {
     // clear screen on first run
-    if(last_repaint==0) dsp->fillrect(0,0,16,16, CRGB::Black);
+    if(last_repaint==0 || force_redraw) dsp->fillrect(0,0,16,16, CRGB::Black);
 
-    if(millis()-last_repaint>CLOCKFACE_MS_PER_FRAME){
-      update_clock_face(dsp);
+    if(millis()-last_repaint>CLOCKFACE_MS_PER_FRAME || force_redraw){
+      update_clock_face(dsp, force_redraw);
       dsp->repaint();
       last_repaint = millis();
     }
@@ -93,7 +93,7 @@ public:
     }
   }
   
-  bool update_clock_face(Display *dsp);
+  bool update_clock_face(Display *dsp, bool force_redraw);
 
   int8_t delta_color;
   uint8_t colorIndex;
@@ -116,7 +116,7 @@ public:
   }
 
   void update_breakout_pad();
-  bool update_clock_face(Display *dsp);
+  bool update_clock_face(Display *dsp, bool force_redraw);
 
   int8_t dx,dy;
   Point pad, ball;
@@ -145,39 +145,39 @@ public:
 
 
 
-  bool update_clock_face(Display *dsp)
+  bool update_clock_face(Display *dsp, bool force_redraw)
   {
     switch (clock_mode & 0x0F)
     {
     case CLOCK_MODE_SNAKE:
-      draw_snake(dsp);
+      draw_snake(dsp, force_redraw);
       break;
     case CLOCK_MODE_PONG:
-      draw_pong(dsp);
+      draw_pong(dsp, force_redraw);
       break;
     // case CLOCK_MODE_MARIO:
     //   draw_mario(dsp);
     //   break;
     case CLOCK_MODE_MATRIX:
-      draw_matrix(dsp);
+      draw_matrix(dsp, force_redraw);
       break;
     case CLOCK_MODE_FIRE:
-      draw_fire(dsp);
+      draw_fire(dsp, force_redraw);
       break;
     default: // CLOCK_MODE_PLAIN
-      draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, true);
+      draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, force_redraw);
       break;
     }
     return false;
   }
 
 
-  void draw_matrix(Display *dsp);
+  void draw_matrix(Display *dsp, bool force_redraw);
   // void draw_mario(Display *dsp);
-  void draw_fire(Display *dsp);
-  void draw_starfield(Display *dsp);
-  void draw_snake(Display *dsp);
-  void draw_pong(Display *dsp);
+  void draw_fire(Display *dsp, bool force_redraw);
+  void draw_starfield(Display *dsp, bool force_redraw);
+  void draw_snake(Display *dsp, bool force_redraw);
+  void draw_pong(Display *dsp, bool force_redraw);
   void update_pong_pad(int8_t idx, int8_t xpos);
 
   void clear_points(Display *dsp)

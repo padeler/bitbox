@@ -10,16 +10,15 @@
 class Message: public Animation
 {
 public:
-    Message(const String &txt, int x, int y, int8_t dx, int8_t dy):dx(dx),dy(dy),x(x),y(y),txt(txt)
+    Message(const String &txt, int x, int y, int8_t dx, int8_t dy, bool compact):dx(dx),dy(dy),x(x),y(y),txt(txt),compact(compact)
     {
         fg_color = CRGB::White;
-        compact = false;
         last_repaint = 0;
     }
 
-    bool update(Display *dsp)
+    bool update(Display *dsp, bool force_redraw)
     {
-        if(millis()-last_repaint>SCROLL_SPEED)
+        if(millis()-last_repaint>SCROLL_SPEED || force_redraw)
         {
             dsp->fillrect(0,y,MATRIX_WIDTH, char_height, CRGB::Black);
             
