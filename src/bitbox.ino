@@ -14,8 +14,8 @@
 
 #include "message.h"
 
-#include "Adafruit_Sensor.h"
-#include "DHT.h"
+// #include "Adafruit_Sensor.h"
+// #include "DHT.h"
 
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 #define DHTPIN 7
@@ -40,7 +40,7 @@ unsigned long last_repaint = 0;
 
 unsigned long last_upd=0;
 
-DHT dht(DHTPIN, DHTTYPE);
+// DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -52,7 +52,7 @@ void setup() {
   // TODO load config from EEPROM
   
   // Initialize thermometer/humidity lib
-  dht.begin();
+  // dht.begin();
 
   // initialize display
   dsp = new Display();
@@ -112,27 +112,27 @@ void serialEvent()
 // }
 
 
-uint8_t hum;
-float temp;
+// uint8_t hum;
+// float temp;
 
-void update_temp(){
+// void update_temp(){
 
-  if(millis()-last_upd>50000){
-    hum = round(dht.readHumidity());
-    temp = dht.readTemperature();
-    last_upd = millis();
+//   if(millis()-last_upd>50000){
+//     hum = round(dht.readHumidity());
+//     temp = dht.readTemperature();
+//     last_upd = millis();
 
-    // Check if any reads failed and exit early (to try again).
-    if (isnan(hum) || isnan(temp)) {
-      Serial.println(F("Failed to read from DHT sensor!"));
-      return;
-    }
+//     // Check if any reads failed and exit early (to try again).
+//     if (isnan(hum) || isnan(temp)) {
+//       Serial.println(F("Failed to read from DHT sensor!"));
+//       return;
+//     }
 
-    dsp->animation_push(new Message(String(hum)+" %", 0,-8,0,1, true)); 
-    dsp->animation_push(new Message(String(temp,1), 0,-8,0,1, true)); 
-    dsp->animation_push(new Collapse()); 
-  }
-}
+//     dsp->animation_push(new Message(String(hum)+" %", 0,-8,0,1, true)); 
+//     dsp->animation_push(new Message(String(temp,1), 0,-8,0,1, true)); 
+//     dsp->animation_push(new Collapse()); 
+//   }
+// }
 
 void loop() {
   
@@ -141,16 +141,15 @@ void loop() {
   }
   else if(Serial.available()==0)
   { //only if serial IO is not pending
+
+
     // if(day()==28 && month()==4 && hour()>=8)
     // {
     //   draw_heart();
     // }
-    // if(true)
-    {
-      update_temp();
-    }
     // else
     { 
+    // update_temp();
       clk->update_clock_face(dsp);
     } 
 
