@@ -1,7 +1,7 @@
 #include <TimeLib.h>
 
 #include "clock.h"
-#include "fire.h"
+// #include "fire.h"
 // #include "mario.h"
 
 inline String format_digit(int d){
@@ -106,19 +106,19 @@ void MultiClockFace::draw_matrix(Display *dsp, bool force_redraw){
 //   }
 // }
 
-/* ************ FIRE FACE ************** */
-void MultiClockFace::draw_fire(Display *dsp, bool force_redraw){
-  dsp->fadetoblack(0,0,16,16, 200);
-  int offset = (motion%fire_frames)*(fire_width*fire_height*3);
+// /* ************ FIRE FACE ************** */
+// void MultiClockFace::draw_fire(Display *dsp, bool force_redraw){
+//   dsp->fadetoblack(0,0,16,16, 200);
+//   int offset = (motion%fire_frames)*(fire_width*fire_height*3);
 
-  dsp->drawImage_pm(fire, offset, 0,0, fire_width, fire_height);    
-  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
+//   dsp->drawImage_pm(fire, offset, 0,0, fire_width, fire_height);    
+//   draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
 
-  if(millis()-anim_frame>100){
-    motion = (motion + (int)dx) % fire_frames;
-    anim_frame = millis();
-  }
-}
+//   if(millis()-anim_frame>100){
+//     motion = (motion + (int)dx) % fire_frames;
+//     anim_frame = millis();
+//   }
+// }
 
 /* ************ STARFIELD FACE ************** */
 bool Starfield::update_clock_face(Display *dsp, bool force_redraw){

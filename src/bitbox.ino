@@ -1,6 +1,7 @@
 #include <TimeLib.h>
 #include <Wire.h>
 #include <DS1307RTC.h>
+#include "SD.h"
 
 #include <stdint.h>
 #include <WString.h>
@@ -20,6 +21,8 @@
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 #define DHTPIN 7
 
+#define SS_PIN 4 // SD CARD SS PIN
+
 #define TARGET_MS_PER_FRAME 30
 #define DEFAULT_TIME 1514589221
 
@@ -28,7 +31,7 @@
 /* ************************* MAIN SKETCH *************************** */
 /* ***************************************************************** */
 
-CommHandler *handler;
+CommHandler *handler = NULL;
 
 Display *dsp;
 Clock *clk;
@@ -44,8 +47,8 @@ unsigned long last_upd=0;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(115200);
-  // Serial.begin(9600);
+  // Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(1000);
   randomSeed(analogRead(0));
   
@@ -61,8 +64,8 @@ void setup() {
   clk = new Clock();
 
   // init communication handler
-  if(Serial) handler = new CommHandler(dsp);
-  else handler = NULL;
+  // if(Serial) handler = new CommHandler(dsp);
+  // else handler = NULL;
   
   setSyncProvider(RTC.get);
   if(timeStatus() != timeSet)
@@ -74,6 +77,14 @@ void setup() {
   {
     Serial.println(F("RTC has set the system time"));
   }
+
+
+  // Serial.print(F("Initializing SD card..."));
+  // if (!SD.begin(SS_PIN)) {
+  //   Serial.println(F("failed!"));
+  //   return;
+  // }
+  // Serial.println(F("OK!"));
 
   // initialize first clock face
   clk->update_clock_face(dsp);
@@ -98,16 +109,157 @@ void serialEvent()
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-// void draw_heart(){
 
+
+// This function opens a Windows Bitmap (BMP) file and
+// displays it at the given coordinates.  It's sped up
+// by reading many pixels worth of data at a time
+// (rather than pixel by pixel).  Increasing the buffer
+// size takes more of the Arduino's precious RAM but
+// makes loading a little faster.  20 pixels seems a
+// good balance.
+
+#define BUFFPIXEL 21
+
+// void bmpDraw(char *filename, Display *dsp) {
+//   File     bmpFile;
+//   int      bmpWidth, bmpHeight;   // W+H in pixels
+//   uint8_t  bmpDepth;              // Bit depth (currently must be 24)
+//   uint32_t bmpImageoffset;        // Start of image data in file
+//   uint32_t rowSize;               // Not always = bmpWidth; may have padding
+//   uint8_t  sdbuffer[BUFFPIXEL]; // pixel in buffer (R+G+B per pixel)
+//   boolean  goodBmp = false;       // Set to true on valid header parse
+//   boolean  flip    = true;        // BMP is stored bottom-to-top
+//   int      w, h, row, col;
+//   uint8_t  r, g, b;
+//   uint32_t pos = 0, startTime = millis();
+  
+//   uint8_t x,y;
+//   x=0;y=0;
+
+//   Serial.println();
+//   Serial.print(F("Loading image '"));
+//   Serial.print(filename);
+//   Serial.println('\'');
+//   // Open requested file on SD card
+//   if ((bmpFile = SD.open(filename)) == NULL) {
+//     Serial.println(F("File not found"));
+//     return;
+//   }
+
+//   // Parse BMP header
+//   if(read16(bmpFile) == 0x4D42) { // BMP signature
+//     Serial.println(F("File size: ")); Serial.println(read32(bmpFile));
+//     (void)read32(bmpFile); // Read & ignore creator bytes
+//     bmpImageoffset = read32(bmpFile); // Start of image data
+//     Serial.print(F("Image Offset: ")); Serial.println(bmpImageoffset, DEC);
+//     // Read DIB header
+//     Serial.print(F("Header size: ")); Serial.println(read32(bmpFile));
+//     bmpWidth  = read32(bmpFile);
+//     bmpHeight = read32(bmpFile);
+//     if(read16(bmpFile) == 1) { // # planes -- must be '1'
+//       bmpDepth = read16(bmpFile); // bits per pixel
+//       Serial.print(F("Bit Depth: ")); Serial.println(bmpDepth);
+//       if((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
+
+//         goodBmp = true; // Supported BMP format -- proceed!
+//         Serial.print(F("Image size: "));
+//         Serial.print(bmpWidth);
+//         Serial.print('x');
+//         Serial.println(bmpHeight);
+
+//         // BMP rows are padded (if needed) to 4-byte boundary
+//         rowSize = (bmpWidth * 3 + 3) & ~3;
+
+//         // If bmpHeight is negative, image is in top-down order.
+//         // This is not canon but has been observed in the wild.
+//         if(bmpHeight < 0) {
+//           bmpHeight = -bmpHeight;
+//           flip      = false;
+//         }
+
+//         // Crop area to be loaded
+//         w = bmpWidth;
+//         h = bmpHeight;
+//         if((x+w-1) >= MATRIX_WIDTH)  w = MATRIX_WIDTH  - x;
+//         if((y+h-1) >= MATRIX_HEIGHT) h = MATRIX_HEIGHT - y;
+
+//         for (row=0; row<h; row++) { // For each scanline...
+//           // Seek to start of scan line.  It might seem labor-
+//           // intensive to be doing this on every line, but this
+//           // method covers a lot of gritty details like cropping
+//           // and scanline padding.  Also, the seek only takes
+//           // place if the file position actually needs to change
+//           // (avoids a lot of cluster math in SD library).
+//           if(flip) // Bitmap is stored bottom-to-top order (normal BMP)
+//             pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize;
+//           else     // Bitmap is stored top-to-bottom
+//             pos = bmpImageoffset + row * rowSize;
+//           if(bmpFile.position() != pos) { // Need seek?
+//             bmpFile.seek(pos);
+//           }
+
+//           for (col=0; col<w; ) { // For each column...
+//             int req_bytes = min((w-col)*3, BUFFPIXEL);
+//             int count = bmpFile.read(sdbuffer, req_bytes);
+//             if(count<=0 || count%3!=0) // should only read multiple of 3bytes (R-G-B) 
+//             { // unexpected EOF
+//               Serial.println(F("Unexpected EOF."));
+//               return;
+//             }
+
+//             for(int p=0;p<count/3;++p)
+//             {
+//               b = sdbuffer[p*3];
+//               g = sdbuffer[p*3+1];
+//               r = sdbuffer[p*3+1];
+//               dsp->set(col+p, row, CRGB(b,g,r));
+//             }
+
+//             col += count/3;
+//           } // end pixel
+//         } // end scanline
+
+//         Serial.print(F("Loaded in "));
+//         Serial.print(millis() - startTime);
+//         Serial.println(" ms");
+//       } // end goodBmp
+//     }
+//   }
+
+//   bmpFile.close();
+//   if(!goodBmp) Serial.println(F("BMP format not recognized."));
+
+// }
+
+// // These read 16- and 32-bit types from the SD card file.
+// // BMP data is stored little-endian, Arduino is little-endian too.
+// // May need to reverse subscript order if porting elsewhere.
+
+// uint16_t read16(File f) {
+//   uint16_t result;
+//   ((uint8_t *)&result)[0] = f.read(); // LSB
+//   ((uint8_t *)&result)[1] = f.read(); // MSB
+//   return result;
+// }
+
+// uint32_t read32(File f) {
+//   uint32_t result;
+//   ((uint8_t *)&result)[0] = f.read(); // LSB
+//   ((uint8_t *)&result)[1] = f.read();
+//   ((uint8_t *)&result)[2] = f.read();
+//   ((uint8_t *)&result)[3] = f.read(); // MSB
+//   return result;
+// }
+
+
+
+// void draw_heart(){
 //   if(millis()-last_upd>100){
-//     uint8_t har[] = {0,1,1,2,2,2,2,1,1,0};
 //     last_upd = millis();
 //     dsp->fillrect(0,0,16,16, CRGB::Black);
-//     int offset = (har[heart_fr%10])*(heart_width*heart_height*3);
-//     dsp->drawImage_pm(heart, offset, 0, 0, heart_width, heart_height);    
+//     bmpDraw("/test/minnie2.bmp", dsp);
 //     dsp->repaint();
-//     heart_fr+=1;
 //   }
 // }
 
@@ -136,16 +288,16 @@ void serialEvent()
 
 void loop() {
   
-  if(handler && handler->isReceiving()){
-    handler->check_timeout();
-  }
-  else if(Serial.available()==0)
+  // if(handler && handler->isReceiving()){
+  //   handler->check_timeout();
+  // }
+  // else if(Serial.available()==0)
   { //only if serial IO is not pending
 
 
     // if(day()==28 && month()==4 && hour()>=8)
     // {
-    //   draw_heart();
+      // draw_heart();
     // }
     // else
     { 
