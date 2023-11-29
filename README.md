@@ -16,6 +16,10 @@ For the s/w on the PC side check the [Pybitbox](https://github.com/padeler/Pybit
 - [Time](https://www.pjrc.com/teensy/td_libs_Time.html)
 - [DS1307RTC](https://github.com/PaulStoffregen/DS1307RTC) 
 
+Testing:
+- [SD](https://www.arduino.cc/reference/en/libraries/sd/)
+- 
+
 ## Useful links
 
 - [Power Topology](https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/power-topology)

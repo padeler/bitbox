@@ -1,7 +1,7 @@
 #include <TimeLib.h>
 #include <Wire.h>
 #include <DS1307RTC.h>
-#include "SD.h"
+#include <SD.h>
 
 #include <stdint.h>
 #include <WString.h>
@@ -64,8 +64,8 @@ void setup() {
   clk = new Clock();
 
   // init communication handler
-  // if(Serial) handler = new CommHandler(dsp);
-  // else handler = NULL;
+  if(Serial) handler = new CommHandler(dsp);
+  else handler = NULL;
   
   setSyncProvider(RTC.get);
   if(timeStatus() != timeSet)
@@ -288,10 +288,10 @@ void serialEvent()
 
 void loop() {
   
-  // if(handler && handler->isReceiving()){
-  //   handler->check_timeout();
-  // }
-  // else if(Serial.available()==0)
+  if(handler && handler->isReceiving()){
+    handler->check_timeout();
+  }
+  else if(Serial.available()==0)
   { //only if serial IO is not pending
 
 
