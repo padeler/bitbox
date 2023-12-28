@@ -3,7 +3,6 @@
  */
 
 #include "display.h"
-#include "font.h"
 
 #define SCROLL_SPEED 100 
 

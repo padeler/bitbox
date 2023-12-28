@@ -1,7 +1,10 @@
 #include <TimeLib.h>
 #include <Wire.h>
 #include <DS1307RTC.h>
-#include <SD.h>
+
+// This caused an unknown crash probably memory issue on the arduino
+// Older versions used to work (circa 2019). Probably wont be an issue with stronger hardware.
+// #include <SD.h>
 
 #include <stdint.h>
 #include <WString.h>
@@ -286,7 +289,17 @@ void serialEvent()
 //   }
 // }
 
+// For debugging
+// bool blink=false;
+// byte i=0,j=0;
+
 void loop() {
+  
+  // CRGB colors[4] = { CRGB::Red, CRGB::Green, CRGB::Blue , CRGB::Black};
+  // dsp->set(i%16, i/16,colors[j%4]);
+  // dsp->repaint();
+  // i++;
+  // if(i==0) j++;
   
   if(handler && handler->isReceiving()){
     handler->check_timeout();
@@ -308,6 +321,16 @@ void loop() {
     if(millis()-last_repaint>TARGET_MS_PER_FRAME){
       dsp->flush_buffer();
       last_repaint = millis();
+
+      // // blink a led 
+      // if(blink)
+      // {
+      //   digitalWrite(LED_BUILTIN, HIGH);
+      // }
+      // else{
+      //   digitalWrite(LED_BUILTIN, LOW);      
+      // }
+      // blink = !blink;
     }
   }
 

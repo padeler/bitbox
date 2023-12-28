@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "FastLED.h"
+#include "font.h"
 
 #define NUM_LEDS 256
 #define DATA_PIN 5
