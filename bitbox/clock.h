@@ -14,9 +14,9 @@
 #define CLOCK_MODE_PONG 2
 #define CLOCK_MODE_BREAKOUT 3
 #define CLOCK_MODE_MATRIX 4
-// #define CLOCK_MODE_FIRE 5
-#define CLOCK_MODE_PLAIN 5 // also max
-// #define CLOCK_MODE_MARIO 7
+#define CLOCK_MODE_FIRE 5
+#define CLOCK_MODE_MARIO 6
+#define CLOCK_MODE_PLAIN 7 // also max
 #define CLOCK_MODE_RANDOM 128
 
 #define DEFAULT_CLOCK_MODE CLOCK_MODE_RANDOM
@@ -113,6 +113,7 @@ public:
     ball.y=MATRIX_HEIGHT-3;
     pad.x = MATRIX_WIDTH/2;
     pad.y = MATRIX_HEIGHT-1;
+    ball_bg = CRGB::Black;
   }
 
   void update_breakout_pad();
@@ -120,6 +121,7 @@ public:
 
   int8_t dx,dy;
   Point pad, ball;
+  CRGB ball_bg;
 };
 
 class MultiClockFace : public ClockFace
@@ -155,15 +157,15 @@ public:
     case CLOCK_MODE_PONG:
       draw_pong(dsp, force_redraw);
       break;
-    // case CLOCK_MODE_MARIO:
-    //   draw_mario(dsp);
-    //   break;
+    case CLOCK_MODE_MARIO:
+      draw_mario(dsp);
+      break;
     case CLOCK_MODE_MATRIX:
       draw_matrix(dsp, force_redraw);
       break;
-    // case CLOCK_MODE_FIRE:
-    //   draw_fire(dsp, force_redraw);
-    //   break;
+    case CLOCK_MODE_FIRE:
+      draw_fire(dsp, force_redraw);
+      break;
     default: // CLOCK_MODE_PLAIN
       draw_time(dsp, Point(2, 0), Point(5, 8), CRGB::White, CRGB::White, true, false, true, force_redraw);
       break;
@@ -173,8 +175,8 @@ public:
 
 
   void draw_matrix(Display *dsp, bool force_redraw);
-  // void draw_mario(Display *dsp);
-  // void draw_fire(Display *dsp, bool force_redraw);
+  void draw_mario(Display *dsp);
+  void draw_fire(Display *dsp, bool force_redraw);
   void draw_starfield(Display *dsp, bool force_redraw);
   void draw_snake(Display *dsp, bool force_redraw);
   void draw_pong(Display *dsp, bool force_redraw);

@@ -1,8 +1,8 @@
 #include <TimeLib.h>
 
 #include "clock.h"
-// #include "fire.h"
-// #include "mario.h"
+#include "fire.h"
+#include "mario.h"
 
 inline String format_digit(int d){
   String s(d);
@@ -88,37 +88,37 @@ void MultiClockFace::draw_matrix(Display *dsp, bool force_redraw){
 }
 
 /* ************ MARIOFACE ************** */
-// void MultiClockFace::draw_mario(Display *dsp, bool force_redraw){
-//   dsp->fillrect(0,0,16,16, CRGB::Black);
-//   int offset = (motion%mario_frames)*(mario_width*mario_height*3);
+void MultiClockFace::draw_mario(Display *dsp){
+  dsp->fillrect(0,0,16,16, CRGB::Black);
+  int offset = (motion%mario_frames)*(mario_width*mario_height*3);
 
-//   dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
-//   draw_time(dsp, Point(0,0), Point(0, 8), CRGB(0x35FF35), CRGB(0x35FF35), false, false, false, true);
+  dsp->drawImage_pm(mario, offset, 2,2, mario_width, mario_height);    
+  draw_time(dsp, Point(0,0), Point(0, 8), CRGB::LightBlue, CRGB::Green, false, false, true, true);
 
-//   if(millis()-anim_frame>250){
+  if(millis()-anim_frame>250){
     
-//     if(motion+dx>=mario_frames || motion+dx<0){
-//       dx = -dx;
-//     }
+    if(motion+dx>=mario_frames || motion+dx<0){
+      dx = -dx;
+    }
     
-//     motion += dx;
-//     anim_frame = millis();
-//   }
-// }
+    motion += dx;
+    anim_frame = millis();
+  }
+}
 
-// /* ************ FIRE FACE ************** */
-// void MultiClockFace::draw_fire(Display *dsp, bool force_redraw){
-//   dsp->fadetoblack(0,0,16,16, 200);
-//   int offset = (motion%fire_frames)*(fire_width*fire_height*3);
+/* ************ FIRE FACE ************** */
+void MultiClockFace::draw_fire(Display *dsp, bool force_redraw){
+  dsp->fadetoblack(0,0,16,16, 200);
+  int offset = (motion%fire_frames)*(fire_width*fire_height*3);
 
-//   dsp->drawImage_pm(fire, offset, 0,0, fire_width, fire_height);    
-//   draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
+  dsp->drawImage_pm(fire, offset, 0,0, fire_width, fire_height);    
+  draw_time(dsp, Point(0,0), Point(8, 0),CRGB::Yellow,CRGB::SteelBlue, true, true, true, true);
 
-//   if(millis()-anim_frame>100){
-//     motion = (motion + (int)dx) % fire_frames;
-//     anim_frame = millis();
-//   }
-// }
+  if(millis()-anim_frame>100){
+    motion = (motion + (int)dx) % fire_frames;
+    anim_frame = millis();
+  }
+}
 
 /* ************ STARFIELD FACE ************** */
 bool Starfield::update_clock_face(Display *dsp, bool force_redraw){
@@ -249,11 +249,11 @@ void MultiClockFace::draw_pong(Display *dsp, bool force_redraw){
 
 
 /* ************ BREAKOUT FACE ************** */
-
+#define MIN_LUMA 80
 bool break_block(CRGB &bl){
-  int v = (int)bl[0]+(int)bl[1]+int(bl[2]);
-  if(v>0){ // there is a block with above min color.
-    if(v>100) bl.nscale8(200); // change color (make dimmer)
+  uint8_t luma = bl.getAverageLight();
+  if(luma>MIN_LUMA){ // there is a block with above min color.
+    bl-=bl/2; // change color (make dimmer)
     return true;
   }
   return false;
@@ -267,14 +267,34 @@ float update_speed(int dx, int base)
 
 bool Breakout::update_clock_face(Display *dsp, bool force_redraw){
   // erase ball
-  dsp->set(ball.x, ball.y, CRGB::Black);
+  dsp->set(ball.x, ball.y, ball_bg);
 
   Point *b = &ball;
-  if(b->y<=8) // check for block collistions
+
+
+  // check that ball is in bounds
+  if(ball.y+dy<0){
+    dy = -dy;
+  }
+
+  if(ball.y+dy>MATRIX_HEIGHT-2){
+    // if(random(3)==1) {
+    //   dx = update_speed(dx, 1);
+    // }
+    dy = -dy;
+  }
+
+  if(ball.x + dx<0 || ball.x + dx>MATRIX_WIDTH-1)
   {
+    dx = -dx;
+  }
+
+  // check for block collistions
+  {
+    
     CRGB tx = dsp->get(b->x+dx, b->y);
     CRGB ty = dsp->get(b->x, b->y+dy);    
-    CRGB t = dsp->get(b->x+dx, b->y+dy);    
+    CRGB t = dsp->get(b->x+dx, b->y+dy);
     
     bool flipx = false;
     bool flipy = false;
@@ -282,11 +302,11 @@ bool Breakout::update_clock_face(Display *dsp, bool force_redraw){
       dsp->set(b->x, b->y+dy, ty);
       flipy = true;
     }
-    if(break_block(tx)){
+    else if(break_block(tx)){
       dsp->set(b->x+dx, b->y, tx);
       flipx = true;
     }
-    if(break_block(t)){
+    else if(break_block(t)){
       dsp->set(b->x+dx, b->y+dy, t);
       flipx = flipy = true;
     }
@@ -295,26 +315,9 @@ bool Breakout::update_clock_face(Display *dsp, bool force_redraw){
     if(flipy) dy = -dy;
   }
 
-  
-  // check that ball is in bounds
-  if(ball.y+dy<0){
-    dy = -dy;
-  }
-
-  if(ball.y+dy>MATRIX_HEIGHT-2){
-    if(random(3)==1) {
-      dx = update_speed(dx, 1);
-    }
-    dy = -dy;
-  }
-
-  if(ball.x + dx<0 || ball.x + dx>MATRIX_WIDTH-1)
-  {
-    dx = -dx;
-  }
-  
   ball.x += dx;
   ball.y += dy;
+  ball_bg = dsp->get(ball.x, ball.y);
 
   update_breakout_pad();
 
